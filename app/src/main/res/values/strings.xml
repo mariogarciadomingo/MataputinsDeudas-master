@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Mataputins&amp;Deudas</string>
+    <string name="DineroCobrado">Dinero Cobrado</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="Usuario">Usuario</string>
+    <string name="Conectando">Conectando</string>
+    <string name="total">Total:</string>
+    <string name="Nombre">Nombre</string>
+    <string name="historial">Ver Historial</string>
+    <string name="dineroHablamos">De cuanto dinero hablamos?</string>
+    <string name="CrearDeuda">Crear Deuda</string>
+    <string name="Descripcion">Descripción</string>
+    <string name="la_elegancia_de_una_deuda_grupal">La elegancia de una deuda grupal</string>
+    <string name="asumen_una_deuda_de">Asumen una deuda de :</string>
+    <string name="firmar">FIRMAR</string>
+    <string name="a_causa_de">A causa de</string>
+    <string name="fondo">fondo</string>
+    <string name="Dinero">Dinero</string>
+    <string name="DeIgualForma">De igual forma Yo</string>
+    <string name="Color">Color Texto</string>
+    <string name="ColorT">Color Materiales</string>
+    <string name="descartar">Descartar</string>
+    <string name="guardar">Guardar</string>
+    <string name="_1_02">1,02 €</string>
+    <string name="Fotos">Fotos de perfil</string>
+</resources>

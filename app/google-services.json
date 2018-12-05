@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "472830008847",
+    "firebase_url": "https://mataputinsdeudas.firebaseio.com",
+    "project_id": "mataputinsdeudas",
+    "storage_bucket": "mataputinsdeudas.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472830008847:android:4df6623956a03411",
+        "android_client_info": {
+          "package_name": "com.example.mario.mataputinsdeudas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "472830008847-nna3sfs4ii1lbqegmmi8iueqvstbhlqt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mario.mataputinsdeudas",
+            "certificate_hash": "5fde624d37abef4c68e959cb3375a7a87cf5bb40"
+          }
+        },
+        {
+          "client_id": "472830008847-garb8crgn8f5617rjdatv55g71sj0i57.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mario.mataputinsdeudas",
+            "certificate_hash": "dd2f86cf7e1c31c451972748247e2b39134a4e4d"
+          }
+        },
+        {
+          "client_id": "472830008847-bbgfb9b55ir3qoj3o7nn5cqc0lccsdlu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPEKl6rqodjj2QexhL2enlrRicgmaoXYg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "472830008847-bbgfb9b55ir3qoj3o7nn5cqc0lccsdlu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fondo"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PrincipalActivity">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/fondo"
+        android:scaleType="centerCrop"
+        ads:layout_constraintHorizontal_bias="0.0"
+        ads:layout_constraintVertical_bias="0.0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@color/colorPrimary" />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swiperefresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        ads:layout_constraintBottom_toTopOf="@+id/btHistorial"
+        ads:layout_constraintEnd_toEndOf="parent"
+        ads:layout_constraintStart_toStartOf="parent"
+        ads:layout_constraintTop_toTopOf="parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v4.widget.NestedScrollView
+                android:id="@+id/scrollView2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+
+                android:visibility="visible"
+                ads:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/Nombre">
+
+                <LinearLayout
+                    android:id="@+id/LinearUsuarios"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+
+                    <LinearLayout
+                        android:id="@+id/PLinearUsuario"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#c8e1dfdf"
+                        android:orientation="horizontal"
+                        android:visibility="visible">
+
+                        <ImageView
+                            android:id="@+id/ImUsuario1"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:contentDescription="@string/Usuario"
+                            android:scaleType="centerCrop"
+                            android:visibility="visible"
+                            ads:srcCompat="@mipmap/ic_launcher_round" />
+
+                        <android.support.constraint.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:minWidth="50px"
+                            android:minHeight="50px">
+
+                            <TextView
+                                android:id="@+id/Usuario1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:layout_marginStart="8dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/Usuario"
+                                android:textAlignment="viewStart"
+                                android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                ads:layout_constraintStart_toStartOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/Total1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/Conectando"
+                                android:textAlignment="viewEnd"
+                                android:textColor="#c1c1c1"
+                                android:textSize="24sp"
+                                ads:layout_constraintEnd_toEndOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+
+                            <ImageView
+                                android:id="@+id/ImAnU1"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="3dp"
+                                android:backgroundTintMode="src_in"
+                                android:foregroundTintMode="add"
+                                android:scaleType="fitCenter"
+                                ads:layout_constraintEnd_toStartOf="@+id/AntU1"
+                                ads:layout_constraintTop_toTopOf="@+id/AntU1" />
+
+                            <TextView
+                                android:id="@+id/AntU1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="80dp"
+                                android:layout_marginEnd="8dp"
+                                android:visibility="visible"
+                                ads:layout_constraintEnd_toEndOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+                        </android.support.constraint.ConstraintLayout>
+
+                    </LinearLayout>
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/Usuario1Layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#ececec"
+                        android:visibility="gone">
+
+                        <EditText
+                            android:id="@+id/EdDinero"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_marginTop="50dp"
+                            android:ems="10"
+                            android:hint="@string/dineroHablamos"
+                            android:inputType="numberDecimal|numberSigned"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal"
+                            ads:layout_constraintEnd_toEndOf="parent"
+                            ads:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/EdDinero">
+
+                            <Button
+                                android:id="@+id/Endeudar1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@android:color/holo_red_light"
+                                android:text="@string/CrearDeuda"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/EdDinero" />
+
+                            <Button
+                                android:id="@+id/Pagado1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="#73ff00"
+                                android:text="@string/DineroCobrado"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/EdDinero"
+                                app:layout_constraintVertical_bias="0.387" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/Edescripcion1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/Descripcion"
+                            android:inputType="textMultiLine"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </android.support.constraint.ConstraintLayout>
+
+                    <LinearLayout
+                        android:id="@+id/LinearUsuario2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="#c8e1dfdf"
+                        android:orientation="horizontal"
+                        android:visibility="visible">
+
+                        <ImageView
+                            android:id="@+id/ImUsuario2"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:contentDescription="@string/Usuario"
+                            android:scaleType="centerCrop"
+                            ads:srcCompat="@mipmap/ic_launcher_round" />
+
+                        <android.support.constraint.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:minHeight="50px">
+
+                            <TextView
+                                android:id="@+id/Usuario2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:layout_marginStart="8dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/Usuario"
+                                android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                ads:layout_constraintStart_toStartOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/Total2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/Conectando"
+                                android:textAlignment="viewEnd"
+                                android:textColor="#c1c1c1"
+                                android:textSize="24sp"
+                                ads:layout_constraintEnd_toEndOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+
+                            <ImageView
+                                android:id="@+id/ImAnU2"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="3dp"
+                                android:backgroundTintMode="src_in"
+                                android:foregroundTintMode="add"
+                                android:scaleType="fitCenter"
+                                ads:layout_constraintEnd_toStartOf="@+id/antU2"
+                                ads:layout_constraintTop_toTopOf="@+id/antU2" />
+
+                            <TextView
+                                android:id="@+id/antU2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="80dp"
+                                android:layout_marginEnd="8dp"
+                                android:visibility="visible"
+                                ads:layout_constraintEnd_toEndOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+                        </android.support.constraint.ConstraintLayout>
+
+                    </LinearLayout>
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/Usuario2Layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#ececec"
+                        android:visibility="gone">
+
+                        <EditText
+                            android:id="@+id/EdDinero2"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_marginTop="50dp"
+                            android:ems="10"
+                            android:hint="@string/dineroHablamos"
+                            android:inputType="numberDecimal|numberSigned"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal"
+                            android:visibility="visible"
+                            ads:layout_constraintEnd_toEndOf="parent"
+                            ads:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/EdDinero2">
+
+                            <Button
+                                android:id="@+id/Endeudar2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@android:color/holo_red_light"
+                                android:text="@string/CrearDeuda"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/EdDinero2" />
+
+                            <Button
+                                android:id="@+id/Pagado2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="#73ff00"
+                                android:text="@string/DineroCobrado"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/EdDinero2"
+                                app:layout_constraintVertical_bias="0.387" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/Edescripcion2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/Descripcion"
+                            android:inputType="textMultiLine"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </android.support.constraint.ConstraintLayout>
+
+                    <LinearLayout
+                        android:id="@+id/LinearUsuario3"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="#c8e1dfdf"
+                        android:orientation="horizontal"
+                        android:visibility="visible">
+
+                        <ImageView
+                            android:id="@+id/ImUsuario3"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:contentDescription="@string/Usuario"
+                            android:scaleType="centerCrop"
+                            ads:srcCompat="@mipmap/ic_launcher_round" />
+
+                        <android.support.constraint.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:minHeight="50px">
+
+                            <ImageView
+                                android:id="@+id/imAnU3"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="3dp"
+                                android:backgroundTintMode="src_in"
+                                android:foregroundTintMode="add"
+                                android:scaleType="fitCenter"
+                                ads:layout_constraintEnd_toStartOf="@+id/antU3"
+                                ads:layout_constraintTop_toTopOf="@+id/antU3" />
+
+                            <TextView
+                                android:id="@+id/antU3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="80dp"
+                                android:layout_marginEnd="8dp"
+                                android:visibility="visible"
+                                ads:layout_constraintEnd_toEndOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/Total3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/Conectando"
+                                android:textAlignment="viewEnd"
+                                android:textColor="#c1c1c1"
+                                android:textSize="24sp"
+                                ads:layout_constraintEnd_toEndOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/Usuario3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:layout_marginStart="8dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/Usuario"
+                                android:textAlignment="viewStart"
+                                android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                ads:layout_constraintStart_toStartOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+                        </android.support.constraint.ConstraintLayout>
+
+                    </LinearLayout>
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/Usuario3Layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#ececec"
+                        android:visibility="gone">
+
+                        <EditText
+                            android:id="@+id/EdDinero3"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_marginTop="50dp"
+                            android:ems="10"
+                            android:hint="@string/dineroHablamos"
+                            android:inputType="numberDecimal|numberSigned"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal"
+                            ads:layout_constraintEnd_toEndOf="parent"
+                            ads:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/EdDinero3">
+
+                            <Button
+                                android:id="@+id/Endeudar3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@android:color/holo_red_light"
+                                android:text="@string/CrearDeuda"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/EdDinero2" />
+
+                            <Button
+                                android:id="@+id/Pagado3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="#73ff00"
+                                android:text="@string/DineroCobrado"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/EdDinero2"
+                                app:layout_constraintVertical_bias="0.387" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/Edescripcion3"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/Descripcion"
+                            android:inputType="textMultiLine"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </android.support.constraint.ConstraintLayout>
+
+                    <LinearLayout
+                        android:id="@+id/LinearUsuario4"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="#c8e1dfdf"
+                        android:orientation="horizontal"
+                        android:visibility="visible">
+
+                        <ImageView
+                            android:id="@+id/ImUsuario4"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:contentDescription="@string/Usuario"
+                            android:scaleType="centerCrop"
+                            ads:srcCompat="@mipmap/ic_launcher_round" />
+
+                        <android.support.constraint.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+
+                            <ImageView
+                                android:id="@+id/imAnU4"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="3dp"
+                                android:backgroundTintMode="src_in"
+                                android:foregroundTintMode="add"
+                                android:scaleType="fitCenter"
+                                ads:layout_constraintEnd_toStartOf="@+id/antU4"
+                                ads:layout_constraintTop_toTopOf="@+id/antU4" />
+
+                            <TextView
+                                android:id="@+id/antU4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="80dp"
+                                android:layout_marginEnd="8dp"
+                                android:visibility="visible"
+                                ads:layout_constraintEnd_toEndOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/Usuario4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:layout_marginStart="8dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/Usuario"
+                                android:textAlignment="viewStart"
+                                android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                ads:layout_constraintStart_toStartOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/Total4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="3dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:text="@string/Conectando"
+                                android:textAlignment="viewEnd"
+                                android:textColor="#c1c1c1"
+                                android:textSize="24sp"
+                                ads:layout_constraintEnd_toEndOf="parent"
+                                ads:layout_constraintTop_toTopOf="parent" />
+                        </android.support.constraint.ConstraintLayout>
+
+                    </LinearLayout>
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/Usuario4Layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#ececec"
+                        android:visibility="gone">
+
+                        <EditText
+                            android:id="@+id/EdDinero4"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_marginTop="50dp"
+                            android:ems="10"
+                            android:hint="@string/dineroHablamos"
+                            android:inputType="numberDecimal|numberSigned"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal"
+                            ads:layout_constraintEnd_toEndOf="parent"
+                            ads:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/EdDinero4">
+
+                            <Button
+                                android:id="@+id/Endeudar4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@android:color/holo_red_light"
+                                android:text="@string/CrearDeuda"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/EdDinero3" />
+
+                            <Button
+                                android:id="@+id/Pagado4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="#73ff00"
+                                android:text="@string/DineroCobrado"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/EdDinero3"
+                                app:layout_constraintVertical_bias="0.387" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/Edescripcion4"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/Descripcion"
+                            android:inputType="textMultiLine"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </android.support.constraint.ConstraintLayout>
+
+                    <android.support.constraint.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:visibility="visible">
+
+                        <TextView
+                            android:id="@+id/TitolTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:layout_weight="1"
+                            android:background="#c8e1dfdf"
+                            android:paddingStart="3dp"
+                            android:paddingEnd="3dp"
+                            android:text="@string/total"
+                            android:textAlignment="viewEnd"
+                            android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:visibility="visible"
+                            ads:layout_constraintBottom_toBottomOf="parent"
+                            ads:layout_constraintEnd_toStartOf="@+id/total"
+                            ads:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/total"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#c8e1dfdf"
+
+
+                            android:paddingStart="3dp"
+                            android:paddingEnd="3dp"
+                            android:text="@string/Conectando"
+                            android:textAlignment="textStart"
+                            android:textSize="24sp"
+                            android:visibility="visible"
+                            ads:layout_constraintBottom_toBottomOf="parent"
+                            ads:layout_constraintEnd_toEndOf="parent"
+                            ads:layout_constraintTop_toTopOf="parent" />
+                    </android.support.constraint.ConstraintLayout>
+
+                </LinearLayout>
+
+            </android.support.v4.widget.NestedScrollView>
+
+            <ImageView
+                android:id="@+id/imtu"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/Usuario"
+                ads:layout_constraintEnd_toEndOf="parent"
+                ads:srcCompat="@mipmap/ic_launcher_round"
+                app:layout_constraintBottom_toTopOf="@+id/scrollView2" />
+
+            <TextView
+                android:id="@+id/Nombre"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:padding="2dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@string/Nombre"
+                android:textColor="@color/cardview_light_background"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                ads:layout_constraintEnd_toStartOf="@+id/imtu"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/txtMorosos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:textColor="@android:color/holo_red_dark"
+                ads:layout_constraintBottom_toBottomOf="@+id/scrollView2"
+                ads:layout_constraintEnd_toEndOf="parent"
+                ads:layout_constraintStart_toStartOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <Button
+        android:id="@+id/btHistorial"
+        style="@android:style/Widget.Material.Button.Borderless"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="49dp"
+        android:layout_marginEnd="49dp"
+        android:background="@color/cardview_dark_background"
+        android:text="@string/historial"
+        android:textColor="@color/cardview_light_background"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        ads:layout_constraintStart_toEndOf="@+id/btPersonalizar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btPersonalizar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@color/cardview_dark_background"
+        android:scaleType="fitXY"
+        android:tint="@color/cardview_light_background"
+        ads:layout_constraintBottom_toBottomOf="parent"
+        ads:layout_constraintStart_toStartOf="parent"
+        ads:srcCompat="@drawable/pincel" />
+
+    <ImageButton
+        android:id="@+id/btGrupal"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@color/cardview_dark_background"
+        android:scaleType="fitXY"
+        android:tint="@color/cardview_light_background"
+        ads:layout_constraintBottom_toBottomOf="parent"
+        ads:layout_constraintEnd_toEndOf="parent"
+        ads:srcCompat="@drawable/group" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/UpdateBt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        android:visibility="gone"
+        ads:layout_constraintBottom_toTopOf="@+id/btGrupal"
+        ads:layout_constraintEnd_toEndOf="parent"
+        ads:srcCompat="@drawable/update" />
+
+
+</android.support.constraint.ConstraintLayout>
