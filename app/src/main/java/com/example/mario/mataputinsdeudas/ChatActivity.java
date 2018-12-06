@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -23,17 +25,23 @@ import java.util.Date;
 
 import co.intentservice.chatui.ChatView;
 import co.intentservice.chatui.models.ChatMessage;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatActivity extends AppCompatActivity {
     FirebaseDatabase database;
     static DatabaseReference myRef,Ref;
     private ArrayList<ChatMessage> messages;
+    private CircleImageView perfil;
+    private ImageView back;
+    ValueEventListener event;
+    private TextView nom;
     String tu;
     String el;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
             super.onCreate(savedInstanceState);
+
             tu = getIntent().getStringExtra("tu");
             el = getIntent().getStringExtra("Usuario");
             setContentView(R.layout.activity_chat);
@@ -41,7 +49,26 @@ public class ChatActivity extends AppCompatActivity {
             database = FirebaseDatabase.getInstance();
             myRef = database.getReference("Chats");
             Ref = database.getReference("users");
-            myRef.addValueEventListener(new ValueEventListener() {
+            perfil = findViewById(R.id.profile_image);
+            nom = findViewById(R.id.TVnom);
+            nom.setText(el);
+            int pos =     getIntent().getIntExtra("pos",0);
+            if(pos==0)
+            {
+                perfil.setImageDrawable(PrincipalActivity.ImUsuario1.getDrawable());
+            }else
+            if(pos==1)
+            {
+                perfil.setImageDrawable(PrincipalActivity.ImUsuario2.getDrawable());
+            }else if(pos==2)
+            {
+                perfil.setImageDrawable(PrincipalActivity.ImUsuario3.getDrawable());
+            }else if(pos==3)
+            {
+                perfil.setImageDrawable(PrincipalActivity.ImUsuario4.getDrawable());
+            }
+            back = findViewById(R.id.BTback);
+            event = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     try {
@@ -62,7 +89,7 @@ public class ChatActivity extends AppCompatActivity {
                             messages.add(mens);
                             chatView.addMessage(mens);
                         }
-                        Ref.child(tu).child("Leidos").child(el).setValue(true);
+                        Ref.child(tu).child("Leidos").child(el).removeValue();
                     } catch (Exception e) {
                         PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                     }
@@ -73,7 +100,17 @@ public class ChatActivity extends AppCompatActivity {
                     // Failed to read value
                     //Log.w(TAG, "Failed to read value.", error.toException());
                 }
+            };
+            back.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    myRef.removeEventListener(event);
+                    finish();
+                }
             });
+
+            myRef.addValueEventListener(event);
 
             chatView.setOnSentMessageListener(new ChatView.OnSentMessageListener() {
                 @Override
@@ -109,5 +146,18 @@ public class ChatActivity extends AppCompatActivity {
         } catch (Exception e) {
             PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        myRef.removeEventListener(event);
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        myRef.addValueEventListener(event);
+
     }
 }

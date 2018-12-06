@@ -132,6 +132,19 @@
                                 android:visibility="visible"
                                 ads:layout_constraintEnd_toEndOf="parent"
                                 ads:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/msgU1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@android:color/holo_green_dark"
+                                android:padding="3dp"
+                                android:text="Mensaje Nuevo"
+                                android:textColor="@color/white"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                ads:layout_constraintBottom_toBottomOf="parent"
+                                ads:layout_constraintStart_toStartOf="parent" />
                         </android.support.constraint.ConstraintLayout>
 
                     </LinearLayout>
@@ -225,6 +238,19 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:minHeight="50px">
+
+                            <TextView
+                                android:id="@+id/msgU2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@android:color/holo_green_dark"
+                                android:padding="3dp"
+                                android:text="Mensaje Nuevo"
+                                android:textColor="@color/white"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                ads:layout_constraintBottom_toBottomOf="parent"
+                                ads:layout_constraintStart_toStartOf="parent" />
 
                             <TextView
                                 android:id="@+id/Usuario2"
@@ -371,6 +397,19 @@
                             android:layout_weight="1"
                             android:minHeight="50px">
 
+                            <TextView
+                                android:id="@+id/msgU3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@android:color/holo_green_dark"
+                                android:padding="3dp"
+                                android:text="Mensaje Nuevo"
+                                android:textColor="@color/white"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                ads:layout_constraintBottom_toBottomOf="parent"
+                                ads:layout_constraintStart_toStartOf="parent" />
+
                             <ImageView
                                 android:id="@+id/imAnU3"
                                 android:layout_width="18dp"
@@ -513,6 +552,19 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight="1">
+
+                            <TextView
+                                android:id="@+id/msgU4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@android:color/holo_green_dark"
+                                android:padding="3dp"
+                                android:text="Mensaje Nuevo"
+                                android:textColor="@color/white"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                ads:layout_constraintBottom_toBottomOf="parent"
+                                ads:layout_constraintStart_toStartOf="parent" />
 
                             <ImageView
                                 android:id="@+id/imAnU4"

@@ -74,7 +74,7 @@ public class PrincipalActivity extends AppCompatActivity {
     private static final int WRITE_REQUEST_CODE = 300;
     private static final String TAG = PrincipalActivity.class.getSimpleName();
     public static ImageView ImUsuario1, ImUsuario2, ImUsuario3, ImUsuario4, fons, Imtu, ImStatU1, ImStatU2, ImStatU3, ImStatU4;
-    public static TextView tot1, tot2, tot3, tot4, total, tot1ant, tot2ant, tot3ant, tot4ant;
+    public static TextView tot1, tot2, tot3, tot4, total, tot1ant, tot2ant, tot3ant, tot4ant,msg1,msg2,msg3,msg4;
     public static double total1, total2, total3, total4;
     public static String[] usuarios;
     public static TextView usuario1, usuario2, usuario3, usuario4, tu, titolTotal, moroso;
@@ -108,6 +108,7 @@ public class PrincipalActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     @Nullable
     private FirebaseUser user;
+    private  ValueEventListener listener;
 
 
 
@@ -211,6 +212,7 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
     private void Declaraciones() {
+
             ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
             context = this;
             if (!preferences.getBoolean("SilencioOA", false)) {
@@ -269,28 +271,44 @@ public class PrincipalActivity extends AppCompatActivity {
         ImUsuario1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[0]).putExtra("tu",nom), ActivityOptions.makeScaleUpAnimation(btgrupal, 0, 0, 400, 400).toBundle());
+                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[0]).putExtra("tu",nom).putExtra("pos",0), ActivityOptions.makeScaleUpAnimation(ImUsuario1, 0, 0, 400, 400).toBundle());
 
             }
         });
         ImUsuario2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[1]).putExtra("tu",nom), ActivityOptions.makeScaleUpAnimation(btgrupal, 0, 0, 400, 400).toBundle());
+                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[1]).putExtra("tu",nom).putExtra("pos",1), ActivityOptions.makeScaleUpAnimation(ImUsuario2, 0, 0, 400, 400).toBundle());
 
             }
         });
         ImUsuario3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[2]).putExtra("tu",nom), ActivityOptions.makeScaleUpAnimation(btgrupal, 0, 0, 400, 400).toBundle());
+                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[2]).putExtra("tu",nom).putExtra("pos",2), ActivityOptions.makeScaleUpAnimation(ImUsuario3, 0, 0, 400, 400).toBundle());
 
             }
         });
         ImUsuario4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[3]).putExtra("tu",nom), ActivityOptions.makeScaleUpAnimation(btgrupal, 0, 0, 400, 400).toBundle());
+                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[3]).putExtra("tu",nom).putExtra("pos",3), ActivityOptions.makeScaleUpAnimation(ImUsuario4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        , 0, 0, 400, 400).toBundle());
 
             }
         });
@@ -335,22 +353,23 @@ public class PrincipalActivity extends AppCompatActivity {
         tu.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                try{
                 SaveLog("Log:","Cerrando Sesión ("+nom+")");
                 SharedPreferences.Editor editor = preferences.edit();
-
                 editor.putString("fondo", "");
                 editor.commit();
                 user = null;
                 mAuth.signOut();
                 mAuth.signOut();
                 mAuth = null;
+                myRef.removeEventListener(listener);
                 finish();
 
-                try {
-                    this.finalize();
-                } catch (Throwable throwable) {
-                    SaveLog("ERROR: ",throwable.getMessage()+" "+Log.getStackTraceString(throwable));
-                    throwable.printStackTrace();
+
+
+                } catch (Exception e) {
+                    SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                    e.printStackTrace();
                 }
                 return false;
             }
@@ -522,6 +541,10 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
     private void FindViews() {
+        msg1 = findViewById(R.id.msgU1);
+        msg2 = findViewById(R.id.msgU2);
+        msg3 = findViewById(R.id.msgU3);
+        msg4 = findViewById(R.id.msgU4);
         Btupdate = findViewById(R.id.UpdateBt);
         moroso = findViewById(R.id.txtMorosos);
         swiperefresh = findViewById(R.id.swiperefresh);
@@ -762,148 +785,147 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
     private void gestorDatos() {
-
-        ref.addValueEventListener(new ValueEventListener() {
+        listener = new ValueEventListener() {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try{
-                try{
-                    if(Boolean.parseBoolean(dataSnapshot.child("Bloqueado").getValue() + ""))
-                    {
-                        Intent intent = new Intent(PrincipalActivity.this,BannedActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                }catch (Exception e){ SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));}
-                try {
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putInt("ColorTexto", Integer.parseInt(dataSnapshot.child("Disseny").child("TextColor").getValue() + ""));
-                    editor.putInt("ColorMateriales", Integer.parseInt(dataSnapshot.child("Disseny").child("TextMaterials").getValue() + ""));
-                    editor.putBoolean("Usuario1Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario1").getValue() + ""));
-                    editor.putBoolean("Usuario2Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario2").getValue() + ""));
-                    editor.putBoolean("Usuario3Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario3").getValue() + ""));
-                    editor.putBoolean("Usuario4Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario4").getValue() + ""));
-                    editor.putBoolean("TotalBool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Total").getValue() + ""));
-                    editor.putBoolean("Imagenes", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Imatges").getValue() + ""));
-                    editor.putBoolean("Contraseña", Boolean.parseBoolean(dataSnapshot.child("Contraseña").child("Activada").getValue() + ""));
-                    editor.commit();
-                    CambiarColor();
-                    CargarConfiguracion();
-                } catch (Exception e) {
-                    SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
-                }
-                int col = preferences.getInt("ColorMateriales", Color.WHITE);
-
-                total4 = EstablirTotal(dataSnapshot, tot4, 3);
-                if (total4 > 10) {
-                    LinearUsuario4.setBackgroundColor(Color.YELLOW);
-                } else {
-                    LinearUsuario4.setBackgroundColor(col);
-                }
-                if (total4 > 23) {
-                    LinearUsuario4.setBackgroundColor(Color.RED);
-                }
-                total3 = EstablirTotal(dataSnapshot, tot3, 2);
-                if (total3 > 10) {
-                    LinearUsuario3.setBackgroundColor(Color.YELLOW);
-                } else {
-                    LinearUsuario3.setBackgroundColor(col);
-                }
-                if (total3 > 23) {
-                    LinearUsuario3.setBackgroundColor(Color.RED);
-                }
-                total2 = EstablirTotal(dataSnapshot, tot2, 1);
-                if (total2 > 10) {
-                    LinearUsuario2.setBackgroundColor(Color.YELLOW);
-                } else {
-                    LinearUsuario2.setBackgroundColor(col);
-                }
-                if (total2 > 23) {
-                    LinearUsuario2.setBackgroundColor(Color.RED);
-                }
-                total1 = EstablirTotal(dataSnapshot, tot1, 0);
-                if (total1 > 10) {
-                    LinearUsuario1.setBackgroundColor(Color.YELLOW);
-                } else {
-                    LinearUsuario1.setBackgroundColor(col);
-                }
-                if (total1 > 23) {
-                    LinearUsuario1.setBackgroundColor(Color.RED);
-                }
-                total.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
-                        .format(total1 + total2 + total3 + total4));
-                total.setTextColor(ColorNumeros(total1 + total2 + total3 + total4));
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("total4", total4 + "");
-                editor.putString("total3", total3 + "");
-                editor.putString("total2", total2 + "");
-                editor.putString("total1", total1 + "");
-                editor.putBoolean("Abierto", true);
-                editor.putString("total4_Ant", EstablirAnt(dataSnapshot, tot4ant, 3, ImStatU4, total4) + "");
-                editor.putString("total3_Ant", EstablirAnt(dataSnapshot, tot3ant, 2, ImStatU3, total3) + "");
-                editor.putString("total2_Ant", EstablirAnt(dataSnapshot, tot2ant, 1, ImStatU2, total2) + "");
-                editor.putString("total1_Ant", EstablirAnt(dataSnapshot, tot1ant, 0, ImStatU1, total1) + "");
-                editor.commit();
-                try {
-                    if(dataSnapshot.child("Leidos").child("foto").getValue()!=null){
-                    if (!Boolean.parseBoolean(dataSnapshot.child("Leidos").child("foto").getValue().toString())) {
-                        descarregarImatges();
-                    }}
-                } catch (Exception e) {
-                    SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
-                }
-                if (total1 + total2 + total3 + total4 < -10) {
-                    moroso.setText("Empiezas a ser una persona morosa");
-                } else
-                    moroso.setText("");
-                if (versionAntigua) {
-
-                    Btupdate.setVisibility(View.VISIBLE);
-                    try {
-                        try {
-                            moroso.setText("Actualización Pendiente");
-                        } catch (Exception e) {
-                            SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                    try{
+                        if(Boolean.parseBoolean(dataSnapshot.child("Bloqueado").getValue() + ""))
+                        {
+                            Intent intent = new Intent(PrincipalActivity.this,BannedActivity.class);
+                            startActivity(intent);
+                            finish();
                         }
+                    }catch (Exception e){ SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));}
+                    try {
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putInt("ColorTexto", Integer.parseInt(dataSnapshot.child("Disseny").child("TextColor").getValue() + ""));
+                        editor.putInt("ColorMateriales", Integer.parseInt(dataSnapshot.child("Disseny").child("TextMaterials").getValue() + ""));
+                        editor.putBoolean("Usuario1Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario1").getValue() + ""));
+                        editor.putBoolean("Usuario2Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario2").getValue() + ""));
+                        editor.putBoolean("Usuario3Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario3").getValue() + ""));
+                        editor.putBoolean("Usuario4Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario4").getValue() + ""));
+                        editor.putBoolean("TotalBool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Total").getValue() + ""));
+                        editor.putBoolean("Imagenes", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Imatges").getValue() + ""));
+                        editor.putBoolean("Contraseña", Boolean.parseBoolean(dataSnapshot.child("Contraseña").child("Activada").getValue() + ""));
+                        editor.commit();
+                        CambiarColor();
+                        CargarConfiguracion();
                     } catch (Exception e) {
                         SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
                     }
-                } else {
-                    Btupdate.setVisibility(View.GONE);
-                    Btupdate.setVisibility(View.GONE);
-                    moroso.setText("");
-                }}catch (Exception e )
+                    int col = preferences.getInt("ColorMateriales", Color.WHITE);
+
+                    total4 = EstablirTotal(dataSnapshot, tot4, 3);
+                    if (total4 > 10) {
+                        LinearUsuario4.setBackgroundColor(Color.YELLOW);
+                    } else {
+                        LinearUsuario4.setBackgroundColor(col);
+                    }
+                    if (total4 > 23) {
+                        LinearUsuario4.setBackgroundColor(Color.RED);
+                    }
+                    total3 = EstablirTotal(dataSnapshot, tot3, 2);
+                    if (total3 > 10) {
+                        LinearUsuario3.setBackgroundColor(Color.YELLOW);
+                    } else {
+                        LinearUsuario3.setBackgroundColor(col);
+                    }
+                    if (total3 > 23) {
+                        LinearUsuario3.setBackgroundColor(Color.RED);
+                    }
+                    total2 = EstablirTotal(dataSnapshot, tot2, 1);
+                    if (total2 > 10) {
+                        LinearUsuario2.setBackgroundColor(Color.YELLOW);
+                    } else {
+                        LinearUsuario2.setBackgroundColor(col);
+                    }
+                    if (total2 > 23) {
+                        LinearUsuario2.setBackgroundColor(Color.RED);
+                    }
+                    total1 = EstablirTotal(dataSnapshot, tot1, 0);
+                    if (total1 > 10) {
+                        LinearUsuario1.setBackgroundColor(Color.YELLOW);
+                    } else {
+                        LinearUsuario1.setBackgroundColor(col);
+                    }
+                    if (total1 > 23) {
+                        LinearUsuario1.setBackgroundColor(Color.RED);
+                    }
+                    total.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
+                            .format(total1 + total2 + total3 + total4));
+                    total.setTextColor(ColorNumeros(total1 + total2 + total3 + total4));
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("total4", total4 + "");
+                    editor.putString("total3", total3 + "");
+                    editor.putString("total2", total2 + "");
+                    editor.putString("total1", total1 + "");
+                    editor.putBoolean("Abierto", true);
+                    editor.putString("total4_Ant", EstablirAnt(dataSnapshot, tot4ant, 3, ImStatU4, total4) + "");
+                    editor.putString("total3_Ant", EstablirAnt(dataSnapshot, tot3ant, 2, ImStatU3, total3) + "");
+                    editor.putString("total2_Ant", EstablirAnt(dataSnapshot, tot2ant, 1, ImStatU2, total2) + "");
+                    editor.putString("total1_Ant", EstablirAnt(dataSnapshot, tot1ant, 0, ImStatU1, total1) + "");
+                    editor.commit();
+                    try {
+                        if(dataSnapshot.child("Leidos").child("foto").getValue()!=null){
+                            if (!Boolean.parseBoolean(dataSnapshot.child("Leidos").child("foto").getValue().toString())) {
+                                descarregarImatges();
+                            }}
+                    } catch (Exception e) {
+                        SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                    }
+                    if (total1 + total2 + total3 + total4 < -10) {
+                        moroso.setText("Empiezas a ser una persona morosa");
+                    } else
+                        moroso.setText("");
+                    if (versionAntigua) {
+
+                        Btupdate.setVisibility(View.VISIBLE);
+                        try {
+                            try {
+                                moroso.setText("Actualización Pendiente");
+                            } catch (Exception e) {
+                                SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                            }
+                        } catch (Exception e) {
+                            SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                        }
+                    } else {
+                        Btupdate.setVisibility(View.GONE);
+                        Btupdate.setVisibility(View.GONE);
+                        moroso.setText("");
+                    }}catch (Exception e )
                 {
                     SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
                 }
                 try{
-                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[0]).getValue()+""))
+                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[0]).getValue()+"") || !dataSnapshot.child("Leidos").hasChild(usuarios[0]))
                     {
-                        ImUsuario1.clearColorFilter();
+                        msg1.setVisibility(View.GONE);
                     }
                     else{
-                        ImUsuario1.setColorFilter(Color.RED);
+                        msg1.setVisibility(View.VISIBLE);
                     }
-                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[1]).getValue()+""))
+                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[1]).getValue()+"")|| !dataSnapshot.child("Leidos").hasChild(usuarios[1]))
                     {
-                        ImUsuario2.clearColorFilter();
+                        msg2.setVisibility(View.GONE);
                     }
                     else{
-                        ImUsuario2.setColorFilter(Color.RED);
+                        msg2.setVisibility(View.VISIBLE);
                     }
-                    if (Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[2]).getValue()+"")){
-                        ImUsuario3.clearColorFilter();
+                    if (Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[2]).getValue()+"")|| !dataSnapshot.child("Leidos").hasChild(usuarios[2])){
+                        msg3.setVisibility(View.GONE);
                     }
                     else{
-                        ImUsuario3.setColorFilter(Color.RED);
+                        msg3.setVisibility(View.VISIBLE);
                     }
-                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[3]).getValue()+""))
+                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[3]).getValue()+"")|| !dataSnapshot.child("Leidos").hasChild(usuarios[3]))
                     {
-                        ImUsuario4.clearColorFilter();
+                        msg4.setVisibility(View.GONE);
                     }
                     else{
-                        ImUsuario4.setColorFilter(Color.RED);
+                        msg4.setVisibility(View.VISIBLE);
                     }
                 }
                 catch (Exception e)
@@ -916,7 +938,8 @@ public class PrincipalActivity extends AppCompatActivity {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
-        });
+        };
+        ref.addValueEventListener(listener);
         versionref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1320,6 +1343,18 @@ public class PrincipalActivity extends AppCompatActivity {
         }
 
     }
+    /*@Override
+    protected void onPause() {
+        super.onPause();
+        myRef.removeEventListener(listener);
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        myRef.addValueEventListener(listener);
+
+    }*/
 
 
 }

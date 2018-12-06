@@ -13,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:versionCode="6"
+        android:versionCode="7"
         android:versionName="A">
         <activity
             android:name=".LoginActivity"
