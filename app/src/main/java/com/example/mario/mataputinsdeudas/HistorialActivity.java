@@ -32,7 +32,7 @@ import java.util.Locale;
 
 public class HistorialActivity extends AppCompatActivity {
     private static final String TAG = "";
-    static DatabaseReference myRef,ref;
+    static DatabaseReference myRef, ref;
     final String Anna = "anna@gmail.com";
     final String Laurita = "laurita@gmail.com";
     final String Lauron = "lauron@gmail.com";
@@ -88,7 +88,7 @@ public class HistorialActivity extends AppCompatActivity {
         }
         if (user.getEmail().equals(Mario)) {
             nom = "Mario";
-            usuarios = new String[]{"Todos", "Laurita", "Lauron", "Anna", "Blanca","Log"};
+            usuarios = new String[]{"Todos", "Laurita", "Lauron", "Anna", "Blanca", "Log"};
 
         }
         if (user.getEmail().equals(Blanca)) {
@@ -128,12 +128,10 @@ public class HistorialActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 seleccionat = usuarios[position];
-                if(seleccionat.equals("Log"))
-                {
+                if (seleccionat.equals("Log")) {
                     inicialitzarAdaptadorLog();
-                }
-                else {
-                inicialitzarAdaptador();
+                } else {
+                    inicialitzarAdaptador();
                 }
             }
 
@@ -160,55 +158,56 @@ public class HistorialActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     try {
-                        if (!seleccionat.equals("Log") && !seleccionat.equals("Errores")){
-                        boolean todos = false;
-                        listDeudas = new ArrayList<>();
-                        if (seleccionat.equals("Todos"))
-                            todos = true;
-                        for (DataSnapshot fechas : dataSnapshot.getChildren()) {
-                            String usuario = fechas.child("usuario").getValue(String.class);
-                            if (todos | seleccionat.equals(usuario)) {
-                                String id = fechas.getKey();
-                                String fecha = fechas.child("fecha").getValue(String.class);
-                                String titol = fechas.child("descripcion").getValue(String.class);
-                                Double valor = fechas.child("valor").getValue(Double.class);
-                                String imatge = "";
-                                if (usuario.equals("Anna")) {
-                                    imatge = "anna.jpg";
-                                }
-                                if (usuario.equals("Blanca")) {
-                                    imatge = "blanca.jpg";
-                                }
-                                if (usuario.equals("Laurita")) {
-                                    imatge = "laurita.jpg";
-                                }
-                                if (usuario.equals("Lauron")) {
-                                    imatge = "lauron.jpg";
-                                }
-                                if (usuario.equals("Mario")) {
-                                    imatge = "mario.jpg";
-                                }
-                                // listDeudas.add(new deuda(id, imatge, titol, valor.toString() + " €", usuario, fecha));
-                                listDeudas.add(new deuda(id, imatge, titol, NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
-                                        .format(valor), usuario, fecha));
+                        if (!seleccionat.equals("Log") && !seleccionat.equals("Errores")) {
+                            boolean todos = false;
+                            listDeudas = new ArrayList<>();
+                            if (seleccionat.equals("Todos"))
+                                todos = true;
+                            for (DataSnapshot fechas : dataSnapshot.getChildren()) {
+                                String usuario = fechas.child("usuario").getValue(String.class);
+                                if (todos | seleccionat.equals(usuario)) {
+                                    String id = fechas.getKey();
+                                    String fecha = fechas.child("fecha").getValue(String.class);
+                                    String titol = fechas.child("descripcion").getValue(String.class);
+                                    Double valor = fechas.child("valor").getValue(Double.class);
+                                    String imatge = "";
+                                    if (usuario.equals("Anna")) {
+                                        imatge = "anna.jpg";
+                                    }
+                                    if (usuario.equals("Blanca")) {
+                                        imatge = "blanca.jpg";
+                                    }
+                                    if (usuario.equals("Laurita")) {
+                                        imatge = "laurita.jpg";
+                                    }
+                                    if (usuario.equals("Lauron")) {
+                                        imatge = "lauron.jpg";
+                                    }
+                                    if (usuario.equals("Mario")) {
+                                        imatge = "mario.jpg";
+                                    }
+                                    // listDeudas.add(new deuda(id, imatge, titol, valor.toString() + " €", usuario, fecha));
+                                    listDeudas.add(new deuda(id, imatge, titol, NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
+                                            .format(valor), usuario, fecha));
 
+                                }
                             }
-                        }
 
 
-                        if (listDeudas.size() == 0) {
-                            listDeudas.add(new deuda("", "", "Historial Vacio", "", "", ""));
+                            if (listDeudas.size() == 0) {
+                                listDeudas.add(new deuda("", "", "Historial Vacio", "", "", ""));
+                            }
+                            RVAdaptador adaptador = new RVAdaptador(listDeudas, Color.BLACK);
+                            rv.setHasFixedSize(true);
+                            rv.setNestedScrollingEnabled(false);
+                            rv.setItemViewCacheSize(20);
+                            rv.setDrawingCacheEnabled(true);
+                            rv.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+                            rv.setAdapter(adaptador);
                         }
-                        RVAdaptador adaptador = new RVAdaptador(listDeudas, Color.BLACK);
-                        rv.setHasFixedSize(true);
-                        rv.setNestedScrollingEnabled(false);
-                        rv.setItemViewCacheSize(20);
-                        rv.setDrawingCacheEnabled(true);
-                        rv.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-                        rv.setAdapter(adaptador);}
                     } catch (Exception e) {
 
-                        PrincipalActivity.SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                        PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                     }
                 }
 
@@ -218,9 +217,10 @@ public class HistorialActivity extends AppCompatActivity {
                 }
             });
         } catch (Exception e) {
-            PrincipalActivity.SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
     }
+
     private void inicialitzarAdaptadorLog()
 
     {
@@ -231,33 +231,34 @@ public class HistorialActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     try {
-                        if(seleccionat.equals("Log")){
-                        boolean todos = false;
-                        listDeudas = new ArrayList<>();
+                        if (seleccionat.equals("Log")) {
+                            boolean todos = false;
+                            listDeudas = new ArrayList<>();
 
-                        for (DataSnapshot fechas : dataSnapshot.getChildren()) {
-                            if(fechas.child("Titulo").exists()&& fechas.child("Mensaje").exists() && fechas.child("Fecha").exists()){
-                            String titol = fechas.child("Titulo").getValue(String.class);
-                            String missatge = fechas.child("Mensaje").getValue(String.class);
-                            String fecha = fechas.child("Fecha").getValue(String.class);
-                            listDeudas.add(new deuda(missatge, "", titol, "", "", fecha));}
+                            for (DataSnapshot fechas : dataSnapshot.getChildren()) {
+                                if (fechas.child("Titulo").exists() && fechas.child("Mensaje").exists() && fechas.child("Fecha").exists()) {
+                                    String titol = fechas.child("Titulo").getValue(String.class);
+                                    String missatge = fechas.child("Mensaje").getValue(String.class);
+                                    String fecha = fechas.child("Fecha").getValue(String.class);
+                                    listDeudas.add(new deuda(missatge, "", titol, "", "", fecha));
+                                }
 
+                            }
+
+
+                            if (listDeudas.size() == 0) {
+                                listDeudas.add(new deuda("", "", "Log Vacio", "", "", ""));
+                            }
+                            RVAdaptadorLog adaptador = new RVAdaptadorLog(listDeudas, Color.BLACK);
+                            rv.setHasFixedSize(true);
+                            rv.setNestedScrollingEnabled(false);
+                            rv.setItemViewCacheSize(20);
+                            rv.setDrawingCacheEnabled(true);
+                            rv.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+                            rv.setAdapter(adaptador);
                         }
-
-
-
-                        if (listDeudas.size() == 0) {
-                            listDeudas.add(new deuda("", "", "Log Vacio", "", "", ""));
-                        }
-                        RVAdaptadorLog adaptador = new RVAdaptadorLog(listDeudas, Color.BLACK);
-                        rv.setHasFixedSize(true);
-                        rv.setNestedScrollingEnabled(false);
-                        rv.setItemViewCacheSize(20);
-                        rv.setDrawingCacheEnabled(true);
-                        rv.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-                        rv.setAdapter(adaptador);}
                     } catch (Exception e) {
-                        PrincipalActivity.SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                        PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
 
                     }
                 }
@@ -268,11 +269,9 @@ public class HistorialActivity extends AppCompatActivity {
                 }
             });
         } catch (Exception e) {
-            PrincipalActivity.SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
     }
-
-
 
 
 }

@@ -29,12 +29,12 @@ public class RVAdaptadorLog extends RecyclerView.Adapter<RVAdaptadorLog.ImatgeVi
 
     public RVAdaptadorLog(@NonNull List<deuda> deudaList, int color) {
 
-        if(!deudaList.isEmpty())
-        Collections.sort(deudaList, new Comparator<deuda>() {
-            public int compare(@NonNull deuda o1, @NonNull deuda o2) {
-                return o1.fecha.compareTo(o2.fecha);
-            }
-        });
+        if (!deudaList.isEmpty())
+            Collections.sort(deudaList, new Comparator<deuda>() {
+                public int compare(@NonNull deuda o1, @NonNull deuda o2) {
+                    return o1.fecha.compareTo(o2.fecha);
+                }
+            });
         Collections.reverse(deudaList);
         RVAdaptadorLog.deudaList
                 = deudaList;
@@ -55,18 +55,16 @@ public class RVAdaptadorLog extends RecyclerView.Adapter<RVAdaptadorLog.ImatgeVi
     @Override
     public void onBindViewHolder(ImatgeViewHolder holder, int position) {
         try {
-            if(deudaList.get(position).getTitol().contains("ERROR"))
-            {
+            if (deudaList.get(position).getTitol().contains("ERROR")) {
                 holder.titol.setBackgroundColor(Color.RED);
-            }
-            else
+            } else
                 holder.titol.setBackgroundColor(Color.GREEN);
-        holder.titol.setText(deudaList.get(position).getTitol());
-        holder.missatge.setText(deudaList.get(position).getId());
-        holder.fecha.setText(deudaList.get(position).getFecha());
-        setAnimation(holder.itemView, position);
+            holder.titol.setText(deudaList.get(position).getTitol());
+            holder.missatge.setText(deudaList.get(position).getId());
+            holder.fecha.setText(deudaList.get(position).getFecha());
+            setAnimation(holder.itemView, position);
         } catch (Exception e) {
-            PrincipalActivity.SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
     }
 

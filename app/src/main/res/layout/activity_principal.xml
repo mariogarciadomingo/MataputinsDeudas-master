@@ -71,8 +71,7 @@
                             android:layout_height="100dp"
                             android:contentDescription="@string/Usuario"
                             android:scaleType="centerCrop"
-                            android:visibility="visible"
-                            ads:srcCompat="@mipmap/ic_launcher_round" />
+                            android:visibility="visible" />
 
                         <android.support.constraint.ConstraintLayout
                             android:layout_width="match_parent"
@@ -105,7 +104,6 @@
                                 android:layout_marginTop="8dp"
                                 android:layout_marginEnd="8dp"
                                 android:layout_weight="1"
-                                android:text="@string/Conectando"
                                 android:textAlignment="viewEnd"
                                 android:textColor="#c1c1c1"
                                 android:textSize="24sp"
@@ -230,8 +228,7 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:contentDescription="@string/Usuario"
-                            android:scaleType="centerCrop"
-                            ads:srcCompat="@mipmap/ic_launcher_round" />
+                            android:scaleType="centerCrop" />
 
                         <android.support.constraint.ConstraintLayout
                             android:layout_width="match_parent"
@@ -275,7 +272,6 @@
                                 android:layout_marginTop="8dp"
                                 android:layout_marginEnd="8dp"
                                 android:layout_weight="1"
-                                android:text="@string/Conectando"
                                 android:textAlignment="viewEnd"
                                 android:textColor="#c1c1c1"
                                 android:textSize="24sp"
@@ -388,8 +384,7 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:contentDescription="@string/Usuario"
-                            android:scaleType="centerCrop"
-                            ads:srcCompat="@mipmap/ic_launcher_round" />
+                            android:scaleType="centerCrop" />
 
                         <android.support.constraint.ConstraintLayout
                             android:layout_width="match_parent"
@@ -439,7 +434,6 @@
                                 android:layout_marginTop="8dp"
                                 android:layout_marginEnd="8dp"
                                 android:layout_weight="1"
-                                android:text="@string/Conectando"
                                 android:textAlignment="viewEnd"
                                 android:textColor="#c1c1c1"
                                 android:textSize="24sp"
@@ -545,8 +539,7 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:contentDescription="@string/Usuario"
-                            android:scaleType="centerCrop"
-                            ads:srcCompat="@mipmap/ic_launcher_round" />
+                            android:scaleType="centerCrop" />
 
                         <android.support.constraint.ConstraintLayout
                             android:layout_width="match_parent"
@@ -611,7 +604,6 @@
                                 android:layout_marginTop="8dp"
                                 android:layout_marginEnd="8dp"
                                 android:layout_weight="1"
-                                android:text="@string/Conectando"
                                 android:textAlignment="viewEnd"
                                 android:textColor="#c1c1c1"
                                 android:textSize="24sp"
@@ -722,7 +714,6 @@
 
                             android:paddingStart="3dp"
                             android:paddingEnd="3dp"
-                            android:text="@string/Conectando"
                             android:textAlignment="textStart"
                             android:textSize="24sp"
                             android:visibility="visible"
@@ -742,7 +733,6 @@
                 android:layout_marginEnd="8dp"
                 android:contentDescription="@string/Usuario"
                 ads:layout_constraintEnd_toEndOf="parent"
-                ads:srcCompat="@mipmap/ic_launcher_round"
                 app:layout_constraintBottom_toTopOf="@+id/scrollView2" />
 
             <TextView
@@ -754,7 +744,6 @@
                 android:padding="2dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:text="@string/Nombre"
                 android:textColor="@color/cardview_light_background"
                 android:textSize="30sp"
                 android:textStyle="bold"

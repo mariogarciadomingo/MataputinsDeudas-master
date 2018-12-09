@@ -64,30 +64,30 @@ public class RVAdaptador extends RecyclerView.Adapter<RVAdaptador.ImatgeViewHold
         try {
             holder.ImProducte.setImageBitmap(BitmapFactory.decodeFile(dir + "/" + deudaList.get(position).getImProducte()));
 
-        holder.titol.setText(deudaList.get(position).getTitol());
-        holder.preu.setText(deudaList.get(position).getPreu());
-        holder.titol.setTextColor(color);
-        holder.fecha.setTextColor(color);
-        holder.fecha.setText(deudaList.get(position).getFecha());
-        if (deudaList.get(position).getTitol().contains("Debes")) {
-            holder.preu.setTextColor(Color.RED);
-            holder.cv.setCardBackgroundColor(Color.argb(200, 255, 102, 0));
-        }
-        if (deudaList.get(position).getTitol().contains("te debe")) {
-            holder.preu.setTextColor(Color.BLUE);
-            holder.cv.setCardBackgroundColor(Color.argb(200, 51, 102, 255));
-        }
-        if (deudaList.get(position).getTitol().toLowerCase().contains("has pagado")) {
-            holder.preu.setTextColor(Color.BLUE);
-            holder.cv.setCardBackgroundColor(Color.argb(200, 255, 204, 102));
-        }
-        if (deudaList.get(position).getTitol().contains("te ha pagado")) {
-            holder.preu.setTextColor(Color.argb(200, 0, 51, 0));
-            holder.cv.setCardBackgroundColor(Color.argb(200, 51, 204, 51));
-        }
-        setAnimation(holder.itemView, position);
+            holder.titol.setText(deudaList.get(position).getTitol());
+            holder.preu.setText(deudaList.get(position).getPreu());
+            holder.titol.setTextColor(color);
+            holder.fecha.setTextColor(color);
+            holder.fecha.setText(deudaList.get(position).getFecha());
+            if (deudaList.get(position).getTitol().contains("Debes")) {
+                holder.preu.setTextColor(Color.RED);
+                holder.cv.setCardBackgroundColor(Color.argb(200, 255, 102, 0));
+            }
+            if (deudaList.get(position).getTitol().contains("te debe")) {
+                holder.preu.setTextColor(Color.BLUE);
+                holder.cv.setCardBackgroundColor(Color.argb(200, 51, 102, 255));
+            }
+            if (deudaList.get(position).getTitol().toLowerCase().contains("has pagado")) {
+                holder.preu.setTextColor(Color.BLUE);
+                holder.cv.setCardBackgroundColor(Color.argb(200, 255, 204, 102));
+            }
+            if (deudaList.get(position).getTitol().contains("te ha pagado")) {
+                holder.preu.setTextColor(Color.argb(200, 0, 51, 0));
+                holder.cv.setCardBackgroundColor(Color.argb(200, 51, 204, 51));
+            }
+            setAnimation(holder.itemView, position);
         } catch (Exception e) {
-            PrincipalActivity.SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
     }
 

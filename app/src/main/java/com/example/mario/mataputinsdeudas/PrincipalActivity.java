@@ -1,6 +1,5 @@
 package com.example.mario.mataputinsdeudas;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -10,6 +9,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -35,6 +36,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.glidebitmappool.GlideBitmapFactory;
+import com.glidebitmappool.GlideBitmapPool;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -53,17 +56,17 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.Struct;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -71,18 +74,19 @@ import java.util.TimerTask;
 
 public class PrincipalActivity extends AppCompatActivity {
     final static int PICK_IMAGE_REQUEST = 1;
-    private static final int WRITE_REQUEST_CODE = 300;
     private static final String TAG = PrincipalActivity.class.getSimpleName();
-    public static ImageView ImUsuario1, ImUsuario2, ImUsuario3, ImUsuario4, fons, Imtu, ImStatU1, ImStatU2, ImStatU3, ImStatU4;
-    public static TextView tot1, tot2, tot3, tot4, total, tot1ant, tot2ant, tot3ant, tot4ant,msg1,msg2,msg3,msg4;
+    public static ImageView ImUsuario1, ImUsuario2, ImUsuario3, ImUsuario4, fons, Imtu, ImStat;
+    public static TextView tot1, tot2, tot3, tot4, total, tot1ant, tot2ant, tot3ant, tot4ant, msg;
     public static double total1, total2, total3, total4;
     public static String[] usuarios;
     public static TextView usuario1, usuario2, usuario3, usuario4, tu, titolTotal, moroso;
     public static File dir;
     static Button Endeudar1, Endeudar2, Endeudar3, Endeudar4, Perdonar1, Perdonar2, Perdonar3, Perdonar4, Historial;
-    static DatabaseReference myRef, ref, versionref, conexions, historial, dblog;
+    static DatabaseReference myRef, ref, versionref, dblog;
     static String nom;
     static Context context;
+    static Double temp = 0.0;
+    static String tempString = "";
     final int PICK_IMAGE_REQUEST_PORFILE = 2;
     final String Anna = "anna@gmail.com";
     final String Laurita = "laurita@gmail.com";
@@ -92,15 +96,16 @@ public class PrincipalActivity extends AppCompatActivity {
     public ImageButton Btupdate;
     public int color = 0;
     boolean programador = false;
-    EditText EdDinero1, EdDinero2, EdDinero3, EdDinero4, Edescripcion1, Edescripcion2, Edescripcion3, Edescripcion4;
+    EditText EdDinero, Edescripcion;
     FirebaseDatabase database;
     LinearLayout LinearUsuario1, LinearUsuario2, LinearUsuario3, LinearUsuario4, LinearUsurios;
-    ConstraintLayout ConstrainUsuario1, ConstrainUsuario2, ConstrainUsuario3, ConstrainUsuario4, Fondo;
+    ConstraintLayout ConstrainUsuario, Fondo;
     SwipeRefreshLayout swiperefresh;
     String token = "";
     boolean versionAntigua = false;
     String url = "";
     @Nullable
+
     String Pfondo;
     SharedPreferences preferences;
     //grupal
@@ -108,12 +113,15 @@ public class PrincipalActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     @Nullable
     private FirebaseUser user;
-    private  ValueEventListener listener;
-
-
-
+    private ValueEventListener listener;
+    static Date fecha = Calendar.getInstance().getTime();
+    static DateFormat df = new SimpleDateFormat("yyyy.MM.dd  HH:mm:ss ");
+    static DateFormat dh = new SimpleDateFormat("yyyyMMddHHmmss ");
+    static MediaPlayer mediaPlayer;
+    static BitmapFactory.Options o = new BitmapFactory.Options();
+    static BitmapFactory.Options o2 = new BitmapFactory.Options();
     public static void DesarFireDisseny(int colorText, int colorMaterials, boolean usu1, boolean usu2, boolean usu3, boolean usu4, boolean total, boolean imatges) {
-        SaveLog("Log:","Cambio Diseño("+nom+")");
+        SaveLog("Log:", "Cambio Diseño(" + nom + ")");
         myRef.child(nom).child("Disseny").child("TextColor").setValue(colorText);
         myRef.child(nom).child("Disseny").child("TextMaterials").setValue(colorMaterials);
         myRef.child(nom).child("Disseny").child("Usuario1").setValue(usu1);
@@ -125,13 +133,13 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
     public static void firmar(ArrayList<Integer> usuarios, EditText descripcion, EditText dinero) {
-        SaveLog("Log:","Deuda grupal ("+nom+")");
-        String descripcio = descripcion.getText().toString();
-        Double valor = Double.parseDouble(dinero.getText().toString()) / usuarios.size();
+        SaveLog("Log:", "Deuda grupal (" + nom + ")");
+        tempString = descripcion.getText().toString();
+        temp = Double.parseDouble(dinero.getText().toString()) / usuarios.size();
         for (int i = 0; i < usuarios.size(); i++) {
             if (usuarios.get(i) != -1) {
-                dinero.setText(valor + "");
-                descripcion.setText(descripcio);
+                dinero.setText(temp + "");
+                descripcion.setText(tempString);
                 if (usuarios.get(i) == 0)
                     deuda(dinero, usuarios.get(i), total1, descripcion);
                 else if (usuarios.get(i) == 1)
@@ -144,52 +152,146 @@ public class PrincipalActivity extends AppCompatActivity {
         }
     }
 
+    private static void deuda(EditText dinero, int usuario, double total, @NonNull EditText concepto) {
+        if (!dinero.getText().toString().equals("")) {
+            if (Double.parseDouble(dinero.getText().toString()) > 0) {
+                //int i = 0;
+                //while (i<200){
+                temp = Double.parseDouble(dinero.getText().toString());
+                Long tempDinero = Math.round(temp * 100);
+                temp = Double.parseDouble(tempDinero.toString()) / 100;
+                Date fecha = Calendar.getInstance().getTime();
+                String conceptoText = concepto.getText().toString();
+
+                String id = dh.format(fecha);
+                String forFecha = df.format(fecha);
+                SaveLog("Log:", "Deuda de " + nom + " para " + usuarios[usuario] + " de " + total + "€");
+                SaveLog("ALERT:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en Deuda");
+                //antigua
+                myRef.child(nom).child(usuarios[usuario]).setValue(total + temp);
+                myRef.child(nom).child(usuarios[usuario] + "_Anterior").setValue(temp);
+                myRef.child(usuarios[usuario]).child(nom).setValue(-(total + temp));
+                myRef.child(usuarios[usuario]).child(nom + "_Anterior").setValue(-temp);
+                //nueva
+                myRef.child(nom).child("Deudas").child(usuarios[usuario]).child("Valor").setValue(total + temp);
+                myRef.child(nom).child("Deudas").child(usuarios[usuario]).child("Valor_Anterior").setValue(temp);
+                myRef.child(usuarios[usuario]).child("Deudas").child(nom).child("Valor").setValue(-(total + temp));
+                myRef.child(usuarios[usuario]).child("Deudas").child(nom).child("Valor_Anterior").setValue(-(temp));
+
+                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("descripcion").setValue(usuarios[usuario] + " te debe " + conceptoText);
+                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("valor").setValue(temp);
+                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("usuario").setValue(usuarios[usuario]);
+                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("fecha").setValue(forFecha);
+                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("modelo").setValue(Build.BRAND + " " + Build.MODEL);
+                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("totalAnterior").setValue(total);
+
+                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("descripcion").setValue("Debes a " + nom + " " + conceptoText);
+                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("valor").setValue(-temp);
+                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("modelo").setValue(Build.BRAND + " " + Build.MODEL);
+                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("usuario").setValue(nom);
+                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("totalAnterior").setValue(total);
+                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("fecha").setValue(forFecha);
+                if (mediaPlayer != null)
+                    mediaPlayer.release();
+                if (usuarios[usuario].equals("Anna")) {
+                    mediaPlayer = MediaPlayer.create(context, R.raw.itocabron);
+                    mediaPlayer.start();
+                } else {
+                    mediaPlayer = MediaPlayer.create(context, R.raw.caja);
+                    mediaPlayer.start();
+
+                }
+                if (conceptoText.toLowerCase().contains("porros") | conceptoText.toLowerCase().contains("pirri") | conceptoText.toLowerCase().contains("porro") | conceptoText.toLowerCase().contains("jimmy") | conceptoText.toLowerCase().contains("maria") | conceptoText.toLowerCase().contains("jimy")) {
+                    if (usuario1.getText().toString() != "Jimmy") {
+                        fons.setImageResource(R.drawable.jimmy);
+                        usuario1.setText("Jimmy");
+                        usuario2.setText("Maria");
+                        usuario3.setText("Felicity");
+                        usuario4.setText("Asobob");
+                        ImUsuario1.setImageResource(R.drawable.jimmy1);
+                        ImUsuario2.setImageResource(R.drawable.jimmy2);
+                        ImUsuario3.setImageResource(R.drawable.jimmy3);
+                        ImUsuario4.setImageResource(R.drawable.jimmy4);
+                        Historial.setText("Jimmear");
+                    }
+
+                } else if (conceptoText.toLowerCase().contains("alcol") | conceptoText.toLowerCase().contains("alcohol") | conceptoText.toLowerCase().contains("gin") | conceptoText.toLowerCase().contains("gim") | conceptoText.toLowerCase().contains("ginebra") | conceptoText.toLowerCase().contains("vodka") | conceptoText.toLowerCase().contains("cubata") | conceptoText.toLowerCase().contains("bebida") | conceptoText.toLowerCase().contains("birra") | conceptoText.toLowerCase().contains("litrona") | conceptoText.toLowerCase().contains("sangria") | conceptoText.toLowerCase().contains("malta") | conceptoText.toLowerCase().contains("cerveza") | conceptoText.toLowerCase().contains("alcolito")) {
+                    if (usuario1.getText().toString() != "Putinov") {
+                        fons.setImageResource(R.drawable.bebidas);
+                        usuario1.setText("Putinov");
+                        usuario2.setText("Sussynov");
+                        usuario3.setText("Russnov");
+                        usuario4.setText("Putibob");
+                        ImUsuario1.setImageResource(R.drawable.borracho1);
+                        ImUsuario2.setImageResource(R.drawable.borracho2);
+                        ImUsuario3.setImageResource(R.drawable.borracho3);
+                        ImUsuario4.setImageResource(R.drawable.borracho4);
+                        Historial.setText("Esta noche Fiesta!");
+                    }
+                }
+                // i++;}
+                dinero.setText("");
+                concepto.setText("");
+
+            }
+        }
+    }
+
+    public static void SaveLog(String log, String message) {
+
+
+        tempString = df.format(Calendar.getInstance().getTime());
+        if (dblog != null) {
+            try {
+                dblog.child("LOG").child(dh.format(Calendar.getInstance().getTime())).child("Titulo").setValue(log + " " + nom + ", Version: " + context.getPackageManager()
+                        .getPackageInfo(context.getPackageName(), 0).versionName);
+            } catch (Exception e) {
+                dblog.child("LOG").child(dh.format(Calendar.getInstance().getTime())).child("Titulo").setValue(log + " " + nom);
+            }
+            dblog.child("LOG").child(dh.format(Calendar.getInstance().getTime())).child("Mensaje").setValue(message);
+            dblog.child("LOG").child(dh.format(Calendar.getInstance().getTime())).child("Fecha").setValue(tempString);
+        }
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        try{
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_principal);
-
-        token = FirebaseInstanceId.getInstance().getToken();
-        mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
-        if (user == null) {
-            startActivity(new Intent(PrincipalActivity.this, LoginActivity.class));
-            System.exit(0);
-        }
-        FindViews();
-        OnClicks();
-        String prog = "";
-        carregarNoms();
-        Declaraciones();
-        inicializarSharedPreferences();
-        if (programador) {
-            prog = "programador/";
-            tu.setText(tu.getText() + "(Test)");
-        } else {
-            carregarImatgesMemoria();
-        }
-        myRef = database.getReference(prog + "users");
-        ref = database.getReference(prog + "users/" + nom);
-        versionref = database.getReference("version");
-        conexions = database.getReference("conexions");
-        historial = database.getReference("historial");
-        dblog = database.getReference();
-        SaveLog("Log:","Session Iniciada "+nom);
-        DateFormat year = new SimpleDateFormat("yyyy ");
-        DateFormat mes = new SimpleDateFormat("MM ");
-        DateFormat dia = new SimpleDateFormat("dd ");
-        DateFormat hora = new SimpleDateFormat("HH_mm_ss ");
         try {
-            conexions.child(nom).child(year.format(Calendar.getInstance().getTime())).child(mes.format(Calendar.getInstance().getTime())).child(dia.format(Calendar.getInstance().getTime())).child(hora.format(Calendar.getInstance().getTime())).setValue(Build.BRAND + " " + Build.MODEL + " vers: " + context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0).versionName.toString());
+            super.onCreate(savedInstanceState);
+            GlideBitmapPool.initialize(10 * 1024 * 1024);
+            setContentView(R.layout.activity_principal);
+
+            token = FirebaseInstanceId.getInstance().getToken();
+            mAuth = FirebaseAuth.getInstance();
+            user = mAuth.getCurrentUser();
+            if (user == null) {
+                startActivity(new Intent(PrincipalActivity.this, LoginActivity.class));
+                System.exit(0);
+            }
+            FindViews();
+            OnClicks();
+            String prog = "";
+            carregarNoms();
+            Declaraciones();
+            inicializarSharedPreferences();
+            if (programador) {
+                prog = "programador/";
+                tu.setText(tu.getText() + "(Test)");
+            } else {
+                carregarImatgesMemoria();
+            }
+            myRef = database.getReference(prog + "users");
+            ref = database.getReference(prog + "users/" + nom);
+            versionref = database.getReference("version");
+            dblog = database.getReference();
+            SaveLog("Log:", "Session Iniciada " + nom);
+            gestorDatos();
+            CambiarColor();
+            CargarConfiguracion();
         } catch (Exception e) {
-            SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
-        gestorDatos();
-        CambiarColor();
-        CargarConfiguracion();
-    }catch (Exception e){SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));}}
+    }
 
     private void CargarConfiguracion() {
         boolean imatges = preferences.getBoolean("Imagenes", true);
@@ -213,99 +315,85 @@ public class PrincipalActivity extends AppCompatActivity {
 
     private void Declaraciones() {
 
-            ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
-            context = this;
-            if (!preferences.getBoolean("SilencioOA", false)) {
-                MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.ao);
-                mediaPlayer.start();
-            }
+        ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
+        context = this;
+        if (!preferences.getBoolean("SilencioOA", false)) {
+            mediaPlayer = MediaPlayer.create(context, R.raw.ao);
+            mediaPlayer.start();
+        }
 
-            dir = wrapper.getDir("Images", MODE_PRIVATE);
+        dir = wrapper.getDir("Images", MODE_PRIVATE);
 
 
-            database = FirebaseDatabase.getInstance();
-            Pfondo = preferences.getString("fondo", "");
-            try {
-                if (Pfondo != "") {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    fons.setImageBitmap(BitmapFactory.decodeFile(Pfondo, options));
-                } else {
-                    try {
+        database = FirebaseDatabase.getInstance();
+        Pfondo = preferences.getString("fondo", "");
+        try {
+            if (Pfondo != "") {
 
-                        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                        StorageReference pathReference = storageRef.child(tu.getText().toString()).child("fondo.jpg");
-                        final File dir = wrapper.getDir("Images", MODE_PRIVATE);
-                        final File fondo = new File(dir, tu.getText().toString() + "fondo" + ".jpg");
-                        swiperefresh.setRefreshing(true);
-                        pathReference.getFile(fondo).addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<FileDownloadTask.TaskSnapshot> task) {
+                fons.setImageBitmap(GlideBitmapFactory.decodeFile(Pfondo));
+            } else {
+                try {
 
-                                fons.setImageBitmap(BitmapFactory.decodeFile(fondo.getAbsolutePath()));
-                                SharedPreferences.Editor editor = preferences.edit();
-                                editor.putString("fondo", fondo.getAbsolutePath());
-                                editor.commit();
-                                swiperefresh.setRefreshing(false);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                swiperefresh.setRefreshing(false);
-                            }
-                        });
+                    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+                    StorageReference pathReference = storageRef.child(tu.getText().toString()).child("fondo.jpg");
+                    final File dir = wrapper.getDir("Images", MODE_PRIVATE);
+                    final File fondo = new File(dir, tu.getText().toString() + "fondo" + ".jpg");
+                    swiperefresh.setRefreshing(true);
+                    pathReference.getFile(fondo).addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<FileDownloadTask.TaskSnapshot> task) {
+                            fons.setImageBitmap(GlideBitmapFactory.decodeFile(fondo.getAbsolutePath()));
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString("fondo", fondo.getAbsolutePath());
+                            editor.commit();
+                            swiperefresh.setRefreshing(false);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            swiperefresh.setRefreshing(false);
+                        }
+                    });
 
-                    } catch (Exception e) {
-                        SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
-                    }
+                } catch (Exception e) {
+                    SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                 }
-            } catch (Exception e) {
-                SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
             }
-            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
-            LinearUsurios.startAnimation(animation);
+        } catch (Exception e) {
+            SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
+        }
+        Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
+        LinearUsurios.startAnimation(animation);
 
     }
 
     private void OnClicks() {
+
         ImUsuario1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[0]).putExtra("tu",nom).putExtra("pos",0), ActivityOptions.makeScaleUpAnimation(ImUsuario1, 0, 0, 400, 400).toBundle());
+                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario", usuarios[0]).putExtra("tu", nom).putExtra("pos", 0), ActivityOptions.makeScaleUpAnimation(ImUsuario1, 0, 0, 400, 400).toBundle());
 
             }
         });
         ImUsuario2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[1]).putExtra("tu",nom).putExtra("pos",1), ActivityOptions.makeScaleUpAnimation(ImUsuario2, 0, 0, 400, 400).toBundle());
+                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario", usuarios[1]).putExtra("tu", nom).putExtra("pos", 1), ActivityOptions.makeScaleUpAnimation(ImUsuario2, 0, 0, 400, 400).toBundle());
 
             }
         });
         ImUsuario3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[2]).putExtra("tu",nom).putExtra("pos",2), ActivityOptions.makeScaleUpAnimation(ImUsuario3, 0, 0, 400, 400).toBundle());
+                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario", usuarios[2]).putExtra("tu", nom).putExtra("pos", 2), ActivityOptions.makeScaleUpAnimation(ImUsuario3, 0, 0, 400, 400).toBundle());
 
             }
         });
         ImUsuario4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario",usuarios[3]).putExtra("tu",nom).putExtra("pos",3), ActivityOptions.makeScaleUpAnimation(ImUsuario4
-
-
-
-
-
-
-
-
-
-
-
-
-
+                startActivity(new Intent(PrincipalActivity.this, ChatActivity.class).putExtra("Usuario", usuarios[3]).putExtra("tu", nom).putExtra("pos", 3), ActivityOptions.makeScaleUpAnimation(ImUsuario4
 
 
                         , 0, 0, 400, 400).toBundle());
@@ -325,11 +413,8 @@ public class PrincipalActivity extends AppCompatActivity {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        SaveLog("Log:","Refresh("+nom+")");
-                        AnimarUsuarios(false, ConstrainUsuario1);
-                        AnimarUsuarios(false, ConstrainUsuario2);
-                        AnimarUsuarios(false, ConstrainUsuario3);
-                        AnimarUsuarios(false, ConstrainUsuario4);
+                        SaveLog("Log:", "Refresh(" + nom + ")");
+
                         if (!programador) {
                             Timer timer = new Timer();
                             timer.schedule(new TimerTask() {
@@ -353,22 +438,23 @@ public class PrincipalActivity extends AppCompatActivity {
         tu.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                try{
-                SaveLog("Log:","Cerrando Sesión ("+nom+")");
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("fondo", "");
-                editor.commit();
-                user = null;
-                mAuth.signOut();
-                mAuth.signOut();
-                mAuth = null;
-                myRef.removeEventListener(listener);
-                finish();
-
+                try {
+                    SaveLog("Log:", "Cerrando Sesión (" + nom + ")");
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("fondo", "");
+                    editor.commit();
+                    user = null;
+                    mAuth.signOut();
+                    mAuth.signOut();
+                    mAuth = null;
+                    myRef.removeEventListener(listener);
+                    //startActivity(new Intent(PrincipalActivity.this, LoginActivity.class), ActivityOptions.makeScaleUpAnimation(tu, 0, 0, 400, 400).toBundle());
+                    //android.os.Process.killProcess(android.os.Process.myPid());
+                    finish();
 
 
                 } catch (Exception e) {
-                    SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                    SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                     e.printStackTrace();
                 }
                 return false;
@@ -384,49 +470,59 @@ public class PrincipalActivity extends AppCompatActivity {
         btPersonalzar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SaveLog("Log:"," Abrir Personalizar("+nom+")");
+                SaveLog("Log:", " Abrir Personalizar(" + nom + ")");
                 startActivity(new Intent(PrincipalActivity.this, PersonalizarActivity.class), ActivityOptions.makeScaleUpAnimation(btPersonalzar, 0, 0, 400, 400).toBundle());
             }
         });
         Historial.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SaveLog("Log:","Abrir Historial ("+nom+")");
+                SaveLog("Log:", "Abrir Historial (" + nom + ")");
                 startActivity(new Intent(PrincipalActivity.this, HistorialActivity.class), ActivityOptions.makeScaleUpAnimation(Historial, 0, 0, 400, 400).toBundle());
             }
         });
         Imtu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SaveLog("Log:","Cambiando Foto de perfil("+nom+")");
+                SaveLog("Log:", "Cambiando Foto de perfil(" + nom + ")");
                 startActivityForResult(Intent.createChooser(new Intent().setType("image/*").setAction(Intent.ACTION_GET_CONTENT), "Selecciona una imagen"), PICK_IMAGE_REQUEST_PORFILE);
             }
         });
         Endeudar4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deuda(EdDinero4, 3, total4, Edescripcion4);
-                AnimarUsuarios(false, ConstrainUsuario4);
+                EdDinero = findViewById(R.id.EdDinero4);
+                Edescripcion= findViewById(R.id.Edescripcion4);
+                deuda(EdDinero, 3, total4, Edescripcion);
+                ConstrainUsuario = findViewById(R.id.Usuario4Layout);
+                AnimarUsuarios(false, ConstrainUsuario);
             }
         });
         Perdonar4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                quitarDeuda(EdDinero4, 3, total4, Edescripcion4);
-                AnimarUsuarios(false, ConstrainUsuario4);
+                EdDinero = findViewById(R.id.EdDinero4);
+                Edescripcion= findViewById(R.id.Edescripcion4);
+                quitarDeuda(EdDinero, 3, total4, Edescripcion);
+                ConstrainUsuario = findViewById(R.id.Usuario4Layout);
+                AnimarUsuarios(false, ConstrainUsuario);
             }
 
         });
         LinearUsuario4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ConstrainUsuario4.getVisibility() == View.GONE) {
-                    AnimarUsuarios(true, ConstrainUsuario4);
-                    AnimarUsuarios(false, ConstrainUsuario3);
-                    AnimarUsuarios(false, ConstrainUsuario2);
-                    AnimarUsuarios(false, ConstrainUsuario1);
+                ConstrainUsuario = findViewById(R.id.Usuario4Layout);
+                if (ConstrainUsuario.getVisibility() == View.GONE) {
+                    AnimarUsuarios(true, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario3Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario2Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario1Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
                 } else {
-                    AnimarUsuarios(false, ConstrainUsuario4);
+                    AnimarUsuarios(false, ConstrainUsuario);
                 }
                 if (total4 < 0.01) {
                     Perdonar4.setVisibility(View.INVISIBLE);
@@ -437,8 +533,11 @@ public class PrincipalActivity extends AppCompatActivity {
         Endeudar3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deuda(EdDinero3, 2, total3, Edescripcion3);
-                AnimarUsuarios(false, ConstrainUsuario3);
+                EdDinero = findViewById(R.id.EdDinero3);
+                Edescripcion= findViewById(R.id.Edescripcion3);
+                deuda(EdDinero, 2, total3, Edescripcion);
+                ConstrainUsuario = findViewById(R.id.Usuario3Layout);
+                AnimarUsuarios(false, ConstrainUsuario);
             }
 
 
@@ -446,20 +545,27 @@ public class PrincipalActivity extends AppCompatActivity {
         Perdonar3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                quitarDeuda(EdDinero3, 2, total3, Edescripcion3);
-                AnimarUsuarios(false, ConstrainUsuario3);
+                EdDinero = findViewById(R.id.EdDinero3);
+                Edescripcion= findViewById(R.id.Edescripcion3);
+                quitarDeuda(EdDinero, 2, total3, Edescripcion);
+                ConstrainUsuario = findViewById(R.id.Usuario3Layout);
+                AnimarUsuarios(false, ConstrainUsuario);
             }
         });
         LinearUsuario3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ConstrainUsuario3.getVisibility() == View.GONE) {
-                    AnimarUsuarios(true, ConstrainUsuario3);
-                    AnimarUsuarios(false, ConstrainUsuario1);
-                    AnimarUsuarios(false, ConstrainUsuario2);
-                    AnimarUsuarios(false, ConstrainUsuario4);
+                ConstrainUsuario = findViewById(R.id.Usuario3Layout);
+                if (ConstrainUsuario.getVisibility() == View.GONE) {
+                    AnimarUsuarios(true, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario4Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario2Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario1Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
                 } else {
-                    AnimarUsuarios(false, ConstrainUsuario3);
+                    AnimarUsuarios(false, ConstrainUsuario);
                 }
                 if (total3 < 0.01) {
                     Perdonar3.setVisibility(View.INVISIBLE);
@@ -470,28 +576,39 @@ public class PrincipalActivity extends AppCompatActivity {
         Endeudar2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deuda(EdDinero2, 1, total2, Edescripcion2);
-                AnimarUsuarios(false, ConstrainUsuario2);
+                EdDinero = findViewById(R.id.EdDinero2);
+                Edescripcion= findViewById(R.id.Edescripcion2);
+                deuda(EdDinero, 1, total2, Edescripcion);
+                ConstrainUsuario = findViewById(R.id.Usuario2Layout);
+
+                AnimarUsuarios(false, ConstrainUsuario);
             }
         });
         Perdonar2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                quitarDeuda(EdDinero2, 1, total2, Edescripcion2);
-                AnimarUsuarios(false, ConstrainUsuario2);
+                EdDinero = findViewById(R.id.EdDinero2);
+                Edescripcion= findViewById(R.id.Edescripcion2);
+                quitarDeuda(EdDinero, 1, total2, Edescripcion);
+                ConstrainUsuario = findViewById(R.id.Usuario2Layout);
+                AnimarUsuarios(false, ConstrainUsuario);
             }
         });
         LinearUsuario2.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                if (ConstrainUsuario2.getVisibility() == View.GONE) {
-                    AnimarUsuarios(true, ConstrainUsuario2);
-                    AnimarUsuarios(false, ConstrainUsuario3);
-                    AnimarUsuarios(false, ConstrainUsuario1);
-                    AnimarUsuarios(false, ConstrainUsuario4);
+                ConstrainUsuario = findViewById(R.id.Usuario2Layout);
+                if (ConstrainUsuario.getVisibility() == View.GONE) {
+                    AnimarUsuarios(true, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario3Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario4Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario1Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
                 } else {
-                    AnimarUsuarios(false, ConstrainUsuario2);
+                    AnimarUsuarios(false, ConstrainUsuario);
                 }
                 if (total2 < 0.01) {
                     Perdonar2.setVisibility(View.INVISIBLE);
@@ -502,27 +619,37 @@ public class PrincipalActivity extends AppCompatActivity {
         Endeudar1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deuda(EdDinero1, 0, total1, Edescripcion1);
-                AnimarUsuarios(false, ConstrainUsuario1);
+                EdDinero = findViewById(R.id.EdDinero);
+                Edescripcion= findViewById(R.id.Edescripcion1);
+                deuda(EdDinero, 0, total1, Edescripcion);
+                ConstrainUsuario = findViewById(R.id.Usuario1Layout);
+                AnimarUsuarios(false, ConstrainUsuario);
             }
         });
         Perdonar1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                quitarDeuda(EdDinero1, 0, total1, Edescripcion1);
-                AnimarUsuarios(false, ConstrainUsuario1);
+                EdDinero = findViewById(R.id.EdDinero);
+                Edescripcion= findViewById(R.id.Edescripcion1);
+                quitarDeuda(EdDinero, 0, total1, Edescripcion);
+                ConstrainUsuario = findViewById(R.id.Usuario1Layout);
+                AnimarUsuarios(false, ConstrainUsuario);
             }
 
         });
         LinearUsuario1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (ConstrainUsuario1.getVisibility() == View.GONE) {
-                    AnimarUsuarios(true, ConstrainUsuario1);
-                    AnimarUsuarios(false, ConstrainUsuario3);
-                    AnimarUsuarios(false, ConstrainUsuario2);
-                    AnimarUsuarios(false, ConstrainUsuario4);
+                ConstrainUsuario = findViewById(R.id.Usuario1Layout);
+                if (ConstrainUsuario.getVisibility() == View.GONE) {
+                    AnimarUsuarios(true, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario3Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario2Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
+                    ConstrainUsuario = findViewById(R.id.Usuario4Layout);
+                    AnimarUsuarios(false, ConstrainUsuario);
                 } else {
-                    AnimarUsuarios(false, ConstrainUsuario1);
+                    AnimarUsuarios(false, ConstrainUsuario);
                 }
                 if (total1 < 0.01) {
                     Perdonar1.setVisibility(View.INVISIBLE);
@@ -533,7 +660,7 @@ public class PrincipalActivity extends AppCompatActivity {
         btgrupal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SaveLog("Log:","Abrir Grupal("+nom+")");
+                SaveLog("Log:", "Abrir Grupal(" + nom + ")");
                 startActivity(new Intent(PrincipalActivity.this, GrupalActivity.class), ActivityOptions.makeScaleUpAnimation(btgrupal, 0, 0, 400, 400).toBundle());
             }
         });
@@ -541,10 +668,8 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
     private void FindViews() {
-        msg1 = findViewById(R.id.msgU1);
-        msg2 = findViewById(R.id.msgU2);
-        msg3 = findViewById(R.id.msgU3);
-        msg4 = findViewById(R.id.msgU4);
+
+
         Btupdate = findViewById(R.id.UpdateBt);
         moroso = findViewById(R.id.txtMorosos);
         swiperefresh = findViewById(R.id.swiperefresh);
@@ -566,47 +691,44 @@ public class PrincipalActivity extends AppCompatActivity {
         tot4 = findViewById(R.id.Total4);
         total = findViewById(R.id.total);
         Endeudar4 = findViewById(R.id.Endeudar4);
-        EdDinero4 = findViewById(R.id.EdDinero4);
+
         Perdonar4 = findViewById(R.id.Pagado4);
-        Edescripcion4 = findViewById(R.id.Edescripcion4);
+
         usuario4 = findViewById(R.id.Usuario4);
         LinearUsuario4 = findViewById(R.id.LinearUsuario4);
-        ConstrainUsuario4 = findViewById(R.id.Usuario4Layout);
+
         Endeudar3 = findViewById(R.id.Endeudar3);
-        EdDinero3 = findViewById(R.id.EdDinero3);
+
         Perdonar3 = findViewById(R.id.Pagado3);
-        Edescripcion3 = findViewById(R.id.Edescripcion3);
+
         usuario3 = findViewById(R.id.Usuario3);
         LinearUsuario3 = findViewById(R.id.LinearUsuario3);
-        ConstrainUsuario3 = findViewById(R.id.Usuario3Layout);
+
         Endeudar2 = findViewById(R.id.Endeudar2);
-        EdDinero2 = findViewById(R.id.EdDinero2);
+
         Perdonar2 = findViewById(R.id.Pagado2);
-        Edescripcion2 = findViewById(R.id.Edescripcion2);
+
         usuario2 = findViewById(R.id.Usuario2);
         LinearUsuario2 = findViewById(R.id.LinearUsuario2);
-        ConstrainUsuario2 = findViewById(R.id.Usuario2Layout);
+
         Endeudar1 = findViewById(R.id.Endeudar1);
-        EdDinero1 = findViewById(R.id.EdDinero);
+
         Perdonar1 = findViewById(R.id.Pagado1);
-        Edescripcion1 = findViewById(R.id.Edescripcion1);
+
         usuario1 = findViewById(R.id.Usuario1);
         LinearUsuario1 = findViewById(R.id.PLinearUsuario);
-        ConstrainUsuario1 = findViewById(R.id.Usuario1Layout);
+
         btgrupal = findViewById(R.id.btGrupal);
         tot1ant = findViewById(R.id.AntU1);
-        ImStatU1 = findViewById(R.id.ImAnU1);
+        ImStat = findViewById(R.id.ImAnU1);
         tot2ant = findViewById(R.id.antU2);
-        ImStatU2 = findViewById(R.id.ImAnU2);
         tot3ant = findViewById(R.id.antU3);
-        ImStatU3 = findViewById(R.id.imAnU3);
         tot4ant = findViewById(R.id.antU4);
-        ImStatU4 = findViewById(R.id.imAnU4);
 
     }
 
     public void EscogerFondo() {
-        SaveLog("Log:","Cambiando Fondo ("+nom+")");
+        SaveLog("Log:", "Cambiando Fondo (" + nom + ")");
         startActivityForResult(Intent.createChooser(new Intent().setType("image/*").setAction(Intent.ACTION_GET_CONTENT), "Selecciona una imagen"), PICK_IMAGE_REQUEST);
     }
 
@@ -658,53 +780,44 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
     private void generarImatges() {
+
         if (user.getEmail().equals(Anna)) {
-            Imtu.setImageBitmap(BitmapFactory.decodeFile(dir + "/anna.jpg"));
-            ImUsuario1.setImageBitmap(BitmapFactory.decodeFile(dir + "/laurita.jpg"));
-            ImUsuario2.setImageBitmap(BitmapFactory.decodeFile(dir + "/lauron.jpg"));
-            ImUsuario3.setImageBitmap(BitmapFactory.decodeFile(dir + "/mario.jpg"));
-            ImUsuario4.setImageBitmap(BitmapFactory.decodeFile(dir + "/blanca.jpg"));
+
+            Imtu.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/anna.jpg"));
+            ImUsuario1.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/laurita.jpg"));
+            ImUsuario2.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/lauron.jpg"));
+            ImUsuario3.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/mario.jpg"));
+            ImUsuario4.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/blanca.jpg"));
 
         }
         if (user.getEmail().equals(Laurita)) {
-            Imtu.setImageBitmap(BitmapFactory.decodeFile(dir + "/laurita.jpg"));
-            ImUsuario1.setImageBitmap(BitmapFactory.decodeFile(dir + "/anna.jpg"));
-            ImUsuario2.setImageBitmap(BitmapFactory.decodeFile(dir + "/lauron.jpg"));
-            ImUsuario3.setImageBitmap(BitmapFactory.decodeFile(dir + "/mario.jpg"));
-            ImUsuario4.setImageBitmap(BitmapFactory.decodeFile(dir + "/blanca.jpg"));
+            Imtu.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/laurita.jpg"));
+            ImUsuario1.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/anna.jpg"));
+            ImUsuario2.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/lauron.jpg"));
+            ImUsuario3.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/mario.jpg"));
+            ImUsuario4.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/blanca.jpg"));
         }
         if (user.getEmail().equals(Lauron)) {
-            Imtu.setImageBitmap(BitmapFactory.decodeFile(dir + "/lauron.jpg"));
-            ImUsuario1.setImageBitmap(BitmapFactory.decodeFile(dir + "/laurita.jpg"));
-            ImUsuario2.setImageBitmap(BitmapFactory.decodeFile(dir + "/anna.jpg"));
-            ImUsuario3.setImageBitmap(BitmapFactory.decodeFile(dir + "/mario.jpg"));
-            ImUsuario4.setImageBitmap(BitmapFactory.decodeFile(dir + "/blanca.jpg"));
+            Imtu.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/lauron.jpg"));
+            ImUsuario1.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/laurita.jpg"));
+            ImUsuario2.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/anna.jpg"));
+            ImUsuario3.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/mario.jpg"));
+            ImUsuario4.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/blanca.jpg"));
         }
         if (user.getEmail().equals(Mario)) {
-            Imtu.setImageBitmap(BitmapFactory.decodeFile(dir + "/mario.jpg"));
-            ImUsuario1.setImageBitmap(BitmapFactory.decodeFile(dir + "/laurita.jpg"));
-            ImUsuario2.setImageBitmap(BitmapFactory.decodeFile(dir + "/lauron.jpg"));
-            ImUsuario3.setImageBitmap(BitmapFactory.decodeFile(dir + "/anna.jpg"));
-            ImUsuario4.setImageBitmap(BitmapFactory.decodeFile(dir + "/blanca.jpg"));
+            Imtu.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/mario.jpg"));
+            ImUsuario1.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/laurita.jpg"));
+            ImUsuario2.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/lauron.jpg"));
+            ImUsuario3.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/anna.jpg"));
+            ImUsuario4.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/blanca.jpg"));
         }
         if (user.getEmail().equals(Blanca)) {
-            Imtu.setImageBitmap(BitmapFactory.decodeFile(dir + "/blanca.jpg"));
-            ImUsuario1.setImageBitmap(BitmapFactory.decodeFile(dir + "/laurita.jpg"));
-            ImUsuario2.setImageBitmap(BitmapFactory.decodeFile(dir + "/lauron.jpg"));
-            ImUsuario3.setImageBitmap(BitmapFactory.decodeFile(dir + "/anna.jpg"));
-            ImUsuario4.setImageBitmap(BitmapFactory.decodeFile(dir + "/mario.jpg"));
+            Imtu.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/blanca.jpg"));
+            ImUsuario1.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/laurita.jpg"));
+            ImUsuario2.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/lauron.jpg"));
+            ImUsuario3.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/anna.jpg"));
+            ImUsuario4.setImageBitmap(GlideBitmapFactory.decodeFile(dir + "/mario.jpg"));
         }
-
-        Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
-        ImUsuario1.clearAnimation();
-        ImUsuario2.clearAnimation();
-        ImUsuario3.clearAnimation();
-        ImUsuario4.clearAnimation();
-        Imtu.startAnimation(animation);
-        ImUsuario1.startAnimation(animation);
-        ImUsuario2.startAnimation(animation);
-        ImUsuario3.startAnimation(animation);
-        ImUsuario4.startAnimation(animation);
 
 
     }
@@ -727,9 +840,9 @@ public class PrincipalActivity extends AppCompatActivity {
                 .format(total3));
         tot4.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
                 .format(total4));
-        double totall = (total1 + total2 + total3 + total4);
+        temp = (total1 + total2 + total3 + total4);
         total.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
-                .format(totall));
+                .format(temp));
         tot1ant.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
                 .format(Double.parseDouble(preferences.getString("total1_Ant", "0"))));
         tot2ant.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
@@ -742,20 +855,31 @@ public class PrincipalActivity extends AppCompatActivity {
         tot2ant.setTextColor(ColorNumeros(Double.parseDouble(preferences.getString("total2_Ant", "0"))));
         tot3ant.setTextColor(ColorNumeros(Double.parseDouble(preferences.getString("total3_Ant", "0"))));
         tot4ant.setTextColor(ColorNumeros(Double.parseDouble(preferences.getString("total4_Ant", "0"))));
-        ImStatU1.setImageResource(EstablirFlecha(Double.parseDouble(preferences.getString("total1_Ant", "0"))));
-        ImStatU2.setImageResource(EstablirFlecha(Double.parseDouble(preferences.getString("total2_Ant", "0"))));
-        ImStatU3.setImageResource(EstablirFlecha(Double.parseDouble(preferences.getString("total3_Ant", "0"))));
-        ImStatU4.setImageResource(EstablirFlecha(Double.parseDouble(preferences.getString("total4_Ant", "0"))));
+
+        ImStat = findViewById(R.id.ImAnU1);
+
+        ImStat.setImageResource(EstablirFlecha(Double.parseDouble(preferences.getString("total1_Ant", "0"))));
+        ImStat = findViewById(R.id.ImAnU2);
+
+        ImStat.setImageResource(EstablirFlecha(Double.parseDouble(preferences.getString("total2_Ant", "0"))));
+        ImStat = findViewById(R.id.imAnU3);
+
+        ImStat.setImageResource(EstablirFlecha(Double.parseDouble(preferences.getString("total3_Ant", "0"))));
+        ImStat = findViewById(R.id.imAnU4);
+
+        ImStat.setImageResource(EstablirFlecha(Double.parseDouble(preferences.getString("total4_Ant", "0"))));
+
+
         tot1.setTextColor(ColorNumeros(total1));
         tot2.setTextColor(ColorNumeros(total2));
         tot3.setTextColor(ColorNumeros(total3));
         tot4.setTextColor(ColorNumeros(total4));
-        total.setTextColor(ColorNumeros(totall));
+        total.setTextColor(ColorNumeros(temp));
         AnimarNumeros("0", total1, tot1);
         AnimarNumeros("0", total2, tot2);
         AnimarNumeros("0", total3, tot3);
         AnimarNumeros("0", total4, tot4);
-        AnimarNumeros("0", totall, total);
+        AnimarNumeros("0", temp, total);
         CargarConfiguracion();
 
     }
@@ -789,15 +913,16 @@ public class PrincipalActivity extends AppCompatActivity {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                try{
-                    try{
-                        if(Boolean.parseBoolean(dataSnapshot.child("Bloqueado").getValue() + ""))
-                        {
-                            Intent intent = new Intent(PrincipalActivity.this,BannedActivity.class);
+                try {
+                    try {
+                        if (Boolean.parseBoolean(dataSnapshot.child("Bloqueado").getValue() + "")) {
+                            Intent intent = new Intent(PrincipalActivity.this, BannedActivity.class);
                             startActivity(intent);
                             finish();
                         }
-                    }catch (Exception e){ SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));}
+                    } catch (Exception e) {
+                        SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
+                    }
                     try {
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putInt("ColorTexto", Integer.parseInt(dataSnapshot.child("Disseny").child("TextColor").getValue() + ""));
@@ -813,7 +938,7 @@ public class PrincipalActivity extends AppCompatActivity {
                         CambiarColor();
                         CargarConfiguracion();
                     } catch (Exception e) {
-                        SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                        SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                     }
                     int col = preferences.getInt("ColorMateriales", Color.WHITE);
 
@@ -862,18 +987,27 @@ public class PrincipalActivity extends AppCompatActivity {
                     editor.putString("total2", total2 + "");
                     editor.putString("total1", total1 + "");
                     editor.putBoolean("Abierto", true);
-                    editor.putString("total4_Ant", EstablirAnt(dataSnapshot, tot4ant, 3, ImStatU4, total4) + "");
-                    editor.putString("total3_Ant", EstablirAnt(dataSnapshot, tot3ant, 2, ImStatU3, total3) + "");
-                    editor.putString("total2_Ant", EstablirAnt(dataSnapshot, tot2ant, 1, ImStatU2, total2) + "");
-                    editor.putString("total1_Ant", EstablirAnt(dataSnapshot, tot1ant, 0, ImStatU1, total1) + "");
+                    ImStat = findViewById(R.id.imAnU4);
+
+                    editor.putString("total4_Ant", EstablirAnt(dataSnapshot, tot4ant, 3, ImStat, total4) + "");
+                    ImStat = findViewById(R.id.imAnU3);
+
+                    editor.putString("total3_Ant", EstablirAnt(dataSnapshot, tot3ant, 2, ImStat, total3) + "");
+                    ImStat = findViewById(R.id.ImAnU2);
+
+                    editor.putString("total2_Ant", EstablirAnt(dataSnapshot, tot2ant, 1, ImStat, total2) + "");
+                    ImStat = findViewById(R.id.ImAnU1);
+
+                    editor.putString("total1_Ant", EstablirAnt(dataSnapshot, tot1ant, 0, ImStat, total1) + "");
                     editor.commit();
                     try {
-                        if(dataSnapshot.child("Leidos").child("foto").getValue()!=null){
+                        if (dataSnapshot.child("Leidos").child("foto").getValue() != null) {
                             if (!Boolean.parseBoolean(dataSnapshot.child("Leidos").child("foto").getValue().toString())) {
                                 descarregarImatges();
-                            }}
+                            }
+                        }
                     } catch (Exception e) {
-                        SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                        SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                     }
                     if (total1 + total2 + total3 + total4 < -10) {
                         moroso.setText("Empiezas a ser una persona morosa");
@@ -886,53 +1020,50 @@ public class PrincipalActivity extends AppCompatActivity {
                             try {
                                 moroso.setText("Actualización Pendiente");
                             } catch (Exception e) {
-                                SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                                SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                             }
                         } catch (Exception e) {
-                            SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                            SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                         }
                     } else {
                         Btupdate.setVisibility(View.GONE);
                         Btupdate.setVisibility(View.GONE);
                         moroso.setText("");
-                    }}catch (Exception e )
-                {
-                    SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                    }
+                } catch (Exception e) {
+                    SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                 }
-                try{
-                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[0]).getValue()+"") || !dataSnapshot.child("Leidos").hasChild(usuarios[0]))
-                    {
-                        msg1.setVisibility(View.GONE);
+                try {
+                    msg = findViewById(R.id.msgU1);
+                    if (Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[0]).getValue() + "") || !dataSnapshot.child("Leidos").hasChild(usuarios[0])) {
+
+                        msg.setVisibility(View.GONE);
+                    } else {
+                        msg.setVisibility(View.VISIBLE);
                     }
-                    else{
-                        msg1.setVisibility(View.VISIBLE);
+                    msg = findViewById(R.id.msgU2);
+                    if (Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[1]).getValue() + "") || !dataSnapshot.child("Leidos").hasChild(usuarios[1])) {
+                        msg.setVisibility(View.GONE);
+                    } else {
+                        msg.setVisibility(View.VISIBLE);
                     }
-                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[1]).getValue()+"")|| !dataSnapshot.child("Leidos").hasChild(usuarios[1]))
-                    {
-                        msg2.setVisibility(View.GONE);
+                    msg = findViewById(R.id.msgU3);
+                    if (Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[2]).getValue() + "") || !dataSnapshot.child("Leidos").hasChild(usuarios[2])) {
+                        msg.setVisibility(View.GONE);
+                    } else {
+                        msg.setVisibility(View.VISIBLE);
                     }
-                    else{
-                        msg2.setVisibility(View.VISIBLE);
+                    msg = findViewById(R.id.msgU4);
+                    if (Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[3]).getValue() + "") || !dataSnapshot.child("Leidos").hasChild(usuarios[3])) {
+                        msg.setVisibility(View.GONE);
+                    } else {
+                        msg.setVisibility(View.VISIBLE);
                     }
-                    if (Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[2]).getValue()+"")|| !dataSnapshot.child("Leidos").hasChild(usuarios[2])){
-                        msg3.setVisibility(View.GONE);
-                    }
-                    else{
-                        msg3.setVisibility(View.VISIBLE);
-                    }
-                    if(Boolean.parseBoolean(dataSnapshot.child("Leidos").child(usuarios[3]).getValue()+"")|| !dataSnapshot.child("Leidos").hasChild(usuarios[3]))
-                    {
-                        msg4.setVisibility(View.GONE);
-                    }
-                    else{
-                        msg4.setVisibility(View.VISIBLE);
-                    }
-                }
-                catch (Exception e)
-                {
-                    SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                } catch (Exception e) {
+                    SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 // Failed to read value
@@ -943,17 +1074,14 @@ public class PrincipalActivity extends AppCompatActivity {
         versionref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
                 try {
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putBoolean("VersionAntigua", (!dataSnapshot.child("code").getValue().toString().equals(context.getPackageManager()
-                            .getPackageInfo(context.getPackageName(), 0).versionName.toString())));
+                            .getPackageInfo(context.getPackageName(), 0).versionName)));
                     editor.commit();
-
-
                 } catch (Exception e) {
                     Toast.makeText(context, "e", Toast.LENGTH_LONG);
-                    SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                    SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                 }
 
                 url = dataSnapshot.child("Url").getValue() + "";
@@ -964,7 +1092,7 @@ public class PrincipalActivity extends AppCompatActivity {
                     try {
                         moroso.setText("Actualización Pendiente");
                     } catch (Exception e) {
-                        SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                        SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                     }
 
                 } else {
@@ -972,6 +1100,8 @@ public class PrincipalActivity extends AppCompatActivity {
                     Btupdate.setVisibility(View.GONE);
                     Btupdate.setVisibility(View.GONE);
                 }
+                versionref = null;
+
             }
 
             @Override
@@ -981,22 +1111,23 @@ public class PrincipalActivity extends AppCompatActivity {
             }
         });
 
+
     }
 
     private Double EstablirTotal(DataSnapshot total, TextView TV, int Usuario) {
-        Double temp;
+
         try {
-            if(total.child(usuarios[Usuario]).getValue()!=null){
-            temp = Double.parseDouble(total.child(usuarios[Usuario]).getValue() + "");
-            TV.setTextColor(ColorNumeros(temp));}
-            else{
+            if (total.child(usuarios[Usuario]).getValue() != null) {
+                temp = Double.parseDouble(total.child(usuarios[Usuario]).getValue() + "");
+                TV.setTextColor(ColorNumeros(temp));
+            } else {
                 temp = 0.00;
                 TV.setTextColor(Color.GRAY);
             }
         } catch (Exception e) {
             temp = 0.00;
             TV.setTextColor(Color.GRAY);
-            SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
         TV.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
                 .format(temp));
@@ -1004,16 +1135,17 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
     private Double EstablirAnt(DataSnapshot total, TextView TV, int Usuario, ImageView IM, Double tot) {
-        Double temp = 0.00;
+
         try {
-            if(total.child(usuarios[Usuario] + "_Anterior").getValue() != null){
-            temp = (Double.parseDouble(total.child(usuarios[Usuario] + "_Anterior").getValue() + ""));
-            TV.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
-                    .format(temp));
-            TV.setTextColor(ColorNumeros(temp));
-            IM.setImageResource(EstablirFlecha(temp));}
+            if (total.child(usuarios[Usuario] + "_Anterior").getValue() != null) {
+                temp = (Double.parseDouble(total.child(usuarios[Usuario] + "_Anterior").getValue() + ""));
+                TV.setText(NumberFormat.getCurrencyInstance(new Locale("es", "ES"))
+                        .format(temp));
+                TV.setTextColor(ColorNumeros(temp));
+                IM.setImageResource(EstablirFlecha(temp));
+            }
         } catch (Exception e) {
-            SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
 
         }
         return temp;
@@ -1055,130 +1187,46 @@ public class PrincipalActivity extends AppCompatActivity {
         usuario.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
-    private static void deuda(EditText dinero, int usuario, double total, @NonNull EditText concepto) {
-        if (!dinero.getText().toString().equals("")) {
-            if (Double.parseDouble(dinero.getText().toString()) > 0) {
-                //int i = 0;
-                //while (i<200){
-                Double Ddinero = Double.parseDouble(dinero.getText().toString());
-                Long tempDinero = Math.round(Ddinero * 100);
-                Ddinero = Double.parseDouble(tempDinero.toString()) / 100;
-                Date fecha = Calendar.getInstance().getTime();
-                String conceptoText = concepto.getText().toString();
-                DateFormat df = new SimpleDateFormat("yyyy.MM.dd  HH:mm:ss ");
-                DateFormat dh = new SimpleDateFormat("yyyyMMddHHmmss ");
-                String id = dh.format(fecha);
-                String forFecha = df.format(fecha);
-                SaveLog("Log:" ,"Deuda de "+nom+" para "+usuarios[usuario]+" de "+total+"€");
-                SaveLog("ALERT:" ,"Hay que eliminar la version antigua cuando todos tengan la version 7 en Deuda");
-                //antigua
-                myRef.child(nom).child(usuarios[usuario]).setValue(total + Ddinero);
-                myRef.child(nom).child(usuarios[usuario] + "_Anterior").setValue(Ddinero);
-                myRef.child(usuarios[usuario]).child(nom).setValue(-(total + Ddinero));
-                myRef.child(usuarios[usuario]).child(nom + "_Anterior").setValue(-Ddinero);
-                //nueva
-                myRef.child(nom).child("Deudas").child(usuarios[usuario]).child("Valor").setValue(total + Ddinero);
-                myRef.child(nom).child("Deudas").child(usuarios[usuario]).child("Valor_Anterior").setValue(Ddinero);
-                myRef.child(usuarios[usuario]).child("Deudas").child(nom).child("Valor").setValue(-(total + Ddinero));
-                myRef.child(usuarios[usuario]).child("Deudas").child(nom).child("Valor_Anterior").setValue(-(Ddinero));
-
-                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("descripcion").setValue(usuarios[usuario] + " te debe " + conceptoText);
-                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("valor").setValue(Ddinero);
-                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("usuario").setValue(usuarios[usuario]);
-                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("fecha").setValue(forFecha);
-                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("modelo").setValue(Build.BRAND + " " + Build.MODEL);
-                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("totalAnterior").setValue(total);
-
-                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("descripcion").setValue("Debes a " + nom + " " + conceptoText);
-                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("valor").setValue(-Ddinero);
-                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("modelo").setValue(Build.BRAND + " " + Build.MODEL);
-                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("usuario").setValue(nom);
-                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("totalAnterior").setValue(total);
-                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("fecha").setValue(forFecha);
-
-                if (usuarios[usuario].equals("Anna")) {
-                    MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.itocabron);
-                    mediaPlayer.start();
-                } else {
-                    MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.caja);
-                    mediaPlayer.start();
-                }
-                if (conceptoText.toLowerCase().contains("porros") | conceptoText.toLowerCase().contains("pirri") | conceptoText.toLowerCase().contains("porro") | conceptoText.toLowerCase().contains("jimmy") | conceptoText.toLowerCase().contains("maria") | conceptoText.toLowerCase().contains("jimy")) {
-                    if (usuario1.getText().toString() != "Jimmy") {
-                        fons.setImageResource(R.drawable.jimmy);
-                        usuario1.setText("Jimmy");
-                        usuario2.setText("Maria");
-                        usuario3.setText("Felicity");
-                        usuario4.setText("Asobob");
-                        ImUsuario1.setImageResource(R.drawable.jimmy1);
-                        ImUsuario2.setImageResource(R.drawable.jimmy2);
-                        ImUsuario3.setImageResource(R.drawable.jimmy3);
-                        ImUsuario4.setImageResource(R.drawable.jimmy4);
-                        Historial.setText("Jimmear");
-                    }
-
-                } else if (conceptoText.toLowerCase().contains("alcol") | conceptoText.toLowerCase().contains("alcohol") | conceptoText.toLowerCase().contains("gin") | conceptoText.toLowerCase().contains("gim") | conceptoText.toLowerCase().contains("ginebra") | conceptoText.toLowerCase().contains("vodka") | conceptoText.toLowerCase().contains("cubata") | conceptoText.toLowerCase().contains("bebida") | conceptoText.toLowerCase().contains("birra") | conceptoText.toLowerCase().contains("litrona") | conceptoText.toLowerCase().contains("sangria") | conceptoText.toLowerCase().contains("malta") | conceptoText.toLowerCase().contains("cerveza") | conceptoText.toLowerCase().contains("alcolito")) {
-                    if (usuario1.getText().toString() != "Putinov") {
-                        fons.setImageResource(R.drawable.bebidas);
-                        usuario1.setText("Putinov");
-                        usuario2.setText("Sussynov");
-                        usuario3.setText("Russnov");
-                        usuario4.setText("Putibob");
-                        ImUsuario1.setImageResource(R.drawable.borracho1);
-                        ImUsuario2.setImageResource(R.drawable.borracho2);
-                        ImUsuario3.setImageResource(R.drawable.borracho3);
-                        ImUsuario4.setImageResource(R.drawable.borracho4);
-                        Historial.setText("Esta noche Fiesta!");
-                    }
-                }
-                // i++;}
-                dinero.setText("");
-                concepto.setText("");
-
-            }
-        }
-    }
-
     private void quitarDeuda(EditText dinero, int usuario, double total, @NonNull EditText concepto) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.caja);
+        if (mediaPlayer != null)
+            mediaPlayer.release();
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.caja);
         mediaPlayer.start();
         if (!dinero.getText().toString().equals("")) {
             if (Double.parseDouble(dinero.getText().toString()) > 0) {
                 if (Double.parseDouble(dinero.getText().toString()) > total) {
                     dinero.setText(total + "");
                 }
-                Double Ddinero = Double.parseDouble(dinero.getText().toString());
-                Long tempDinero = Math.round(Ddinero * 100);
-                Ddinero = Double.parseDouble(tempDinero.toString()) / 100;
+                temp = Double.parseDouble(dinero.getText().toString());
+                Long tempDinero = Math.round(temp * 100);
+                temp = Double.parseDouble(tempDinero.toString()) / 100;
 
                 //antiguo
-                SaveLog("ALERT:" ,"Hay que eliminar la version antigua cuando todos tengan la version 7 en Deuda");
-                myRef.child(nom).child(usuarios[usuario]).setValue(total - Ddinero);
-                myRef.child(nom).child(usuarios[usuario] + "_Anterior").setValue(-Ddinero);
-                myRef.child(usuarios[usuario]).child(nom).setValue(-(total - Ddinero));
-                myRef.child(usuarios[usuario]).child(nom + "_Anterior").setValue(+(Ddinero));
+                SaveLog("ALERT:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en Deuda");
+                myRef.child(nom).child(usuarios[usuario]).setValue(total - temp);
+                myRef.child(nom).child(usuarios[usuario] + "_Anterior").setValue(-temp);
+                myRef.child(usuarios[usuario]).child(nom).setValue(-(total - temp));
+                myRef.child(usuarios[usuario]).child(nom + "_Anterior").setValue(+(temp));
 
                 //nuevo
-                myRef.child(nom).child("Deudas").child(usuarios[usuario]).child("Valor").setValue(total - Ddinero);
-                myRef.child(nom).child("Deudas").child(usuarios[usuario]).child("Valor_Anterior").setValue(-Ddinero);
-                myRef.child(usuarios[usuario]).child("Deudas").child(nom).child("Valor").setValue(-(total - Ddinero));
-                myRef.child(usuarios[usuario]).child("Deudas").child(nom).child("Valor_Anterior").setValue(+(Ddinero));
+                myRef.child(nom).child("Deudas").child(usuarios[usuario]).child("Valor").setValue(total - temp);
+                myRef.child(nom).child("Deudas").child(usuarios[usuario]).child("Valor_Anterior").setValue(-temp);
+                myRef.child(usuarios[usuario]).child("Deudas").child(nom).child("Valor").setValue(-(total - temp));
+                myRef.child(usuarios[usuario]).child("Deudas").child(nom).child("Valor_Anterior").setValue(+(temp));
 
-                SaveLog("Log:", "Deuda Perdonada de "+nom+" para "+usuarios[usuario]+" de "+total+"€");
-                Date fecha = Calendar.getInstance().getTime();
-                DateFormat df = new SimpleDateFormat("yyyy.MM.dd  HH:mm:ss ");
-                DateFormat dh = new SimpleDateFormat("yyyyMMddHHmmss ");
+                SaveLog("Log:", "Deuda Perdonada de " + nom + " para " + usuarios[usuario] + " de " + total + "€");
+
                 String id = dh.format(fecha);
                 String forFecha = df.format(fecha);
                 myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("descripcion").setValue(usuarios[usuario] + " te ha pagado " + concepto.getText().toString());
                 myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("modelo").setValue(Build.BRAND + " " + Build.MODEL);
-                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("valor").setValue(Ddinero);
+                myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("valor").setValue(temp);
                 myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("usuario").setValue(usuarios[usuario]);
                 myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("totalAnterior").setValue(total);
                 myRef.child(nom).child("historial").child(id + usuarios[usuario]).child("fecha").setValue(forFecha);
 
                 myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("descripcion").setValue("Has pagado " + concepto.getText().toString() + " a " + nom);
-                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("valor").setValue(-Ddinero);
+                myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("valor").setValue(-temp);
                 myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("modelo").setValue(Build.BRAND + " " + Build.MODEL);
                 myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("usuario").setValue(nom);
                 myRef.child(usuarios[usuario]).child("historial").child(id + nom).child("totalAnterior").setValue(total);
@@ -1201,7 +1249,7 @@ public class PrincipalActivity extends AppCompatActivity {
                 file = new File(file, "fondo" + ".jpg");
                 OutputStream stream;
                 stream = new FileOutputStream(file);
-                MediaStore.Images.Media.getBitmap(getContentResolver(), uri).compress(Bitmap.CompressFormat.PNG, 70, stream);
+                MediaStore.Images.Media.getBitmap(getContentResolver(), uri).compress(Bitmap.CompressFormat.JPEG, 50, stream);
                 stream.flush();
                 stream.close();
                 SharedPreferences.Editor editor = preferences.edit();
@@ -1218,6 +1266,7 @@ public class PrincipalActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         swiperefresh.setRefreshing(false);
+
                     }
 
                 }).addOnFailureListener(new OnFailureListener() {
@@ -1226,8 +1275,10 @@ public class PrincipalActivity extends AppCompatActivity {
                         swiperefresh.setRefreshing(false);
                     }
                 });
+                file = null;
+
             } catch (IOException e) {
-                SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                 e.printStackTrace();
             }
         }
@@ -1260,7 +1311,7 @@ public class PrincipalActivity extends AppCompatActivity {
                 });
 
             } catch (IOException e) {
-                SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+                SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                 e.printStackTrace();
             }
         }
@@ -1269,7 +1320,7 @@ public class PrincipalActivity extends AppCompatActivity {
     private void descarregarImatges() {
 
         try {
-            SaveLog("Log:","Descargando Imagenes ("+nom+")");
+            SaveLog("Log:", "Descargando Imagenes (" + nom + ")");
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
             StorageReference pathReference = storageRef.child("laurita.jpg");
             ContextWrapper wrapper = new ContextWrapper(getApplicationContext());
@@ -1285,22 +1336,29 @@ public class PrincipalActivity extends AppCompatActivity {
             pathReference.getFile(new File(dir, "mario" + ".jpg")).addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<FileDownloadTask.TaskSnapshot> task) {
+                   try{
                     generarImatges();
                     myRef.child(nom).child("Leidos").child("foto").setValue(true);
                     //antiguo
-                    SaveLog("ALERT:" ,"Hay que eliminar la version antigua cuando todos tengan la version 7 en \n myRef.child(nom).child(\"foto\").removeValue();");
+                    SaveLog("ALERT:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en \n myRef.child(nom).child(\"foto\").removeValue();");
                     myRef.child(nom).child("foto").removeValue();
-                    swiperefresh.setRefreshing(false);
+                    swiperefresh.setRefreshing(false);}catch (Exception e)
+                   {
+                       SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
+
+                   }
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     swiperefresh.setRefreshing(false);
+                    SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
+
                 }
             });
 
         } catch (Exception e) {
-            SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
     }
 
@@ -1311,38 +1369,24 @@ public class PrincipalActivity extends AppCompatActivity {
         Pfondo = preferences.getString("fondo", "");
         try {
             if (Pfondo != "") {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                fons.setImageBitmap(BitmapFactory.decodeFile(Pfondo, options));
+
+
+                fons.setImageBitmap(GlideBitmapFactory.decodeFile(Pfondo));
+
             }
         } catch (Exception e) {
-            SaveLog("ERROR: ",e.getMessage()+" "+Log.getStackTraceString(e));
+            SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
         CambiarColor();
     }
 
     private void DownloadData() {
-        SaveLog("Log:","Descargando Actualización ("+nom+")");
+        SaveLog("Log:", "Descargando Actualización (" + nom + ")");
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(browserIntent);
 
     }
-    public static void SaveLog(String log,String message)
-    {
-        DateFormat df = new SimpleDateFormat("yyyy.MM.dd  HH:mm:ss ");
-        DateFormat hora = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss ");
-        String forFecha = df.format(Calendar.getInstance().getTime());
-        if(dblog!=null)
-        {
-            try{
-            dblog.child("LOG").child(hora.format(Calendar.getInstance().getTime())).child("Titulo").setValue(log + " "+ nom +", Version: "+context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0).versionName);}
-                    catch (Exception e){dblog.child("LOG").child(hora.format(Calendar.getInstance().getTime())).child("Titulo").setValue(log + " "+ nom);}
-            dblog.child("LOG").child(hora.format(Calendar.getInstance().getTime())).child("Mensaje").setValue(message);
-            dblog.child("LOG").child(hora.format(Calendar.getInstance().getTime())).child("Fecha").setValue(forFecha);
-        }
 
-    }
     /*@Override
     protected void onPause() {
         super.onPause();
@@ -1355,7 +1399,34 @@ public class PrincipalActivity extends AppCompatActivity {
         myRef.addValueEventListener(listener);
 
     }*/
+    private Bitmap decodeFile(File f) {
+        try {
+            // Decode image size
+
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
+
+            // The new size we want to scale to
+            final int REQUIRED_SIZE = 70;
+
+            // Find the correct scale value. It should be the power of 2.
+            int scale = 1;
+            while (o.outWidth / scale / 2 >= REQUIRED_SIZE &&
+                    o.outHeight / scale / 2 >= REQUIRED_SIZE) {
+                scale *= 2;
+            }
+
+            // Decode with inSampleSize
+
+            o2.inSampleSize = scale;
+            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+        } catch (FileNotFoundException e) {
+        }
+        return null;
+    }
+
+
+
 
 
 }
-

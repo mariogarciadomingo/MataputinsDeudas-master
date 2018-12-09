@@ -1,11 +1,12 @@
 package com.example.mario.mataputinsdeudas;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
 public class BannedActivity extends AppCompatActivity {
     ImageView ImTu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

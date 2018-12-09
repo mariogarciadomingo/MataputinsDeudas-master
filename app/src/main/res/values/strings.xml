@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">Mataputins&amp;Deudas</string>
     <string name="DineroCobrado">Dinero Cobrado</string>
-    <string name="appwidget_text">EXAMPLE</string>
-    <string name="add_widget">Add widget</string>
     <string name="Usuario">Usuario</string>
     <string name="Conectando">Conectando</string>
     <string name="total">Total:</string>
