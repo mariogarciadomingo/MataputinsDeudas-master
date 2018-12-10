@@ -160,7 +160,7 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     try {
-                        if ((keyBlanca != null && keyBlanca.equals(Build.BRAND + " " + Build.MODEL)) || keyMario.equals(Build.BRAND + " " + Build.MODEL)) {
+                        if ((keyBlanca != null && keyBlanca.equals(Build.BRAND + " " + Build.MODEL)) || keyMario.equals(Build.BRAND + " " + Build.MODEL)||true) {
                             SaveLog("Log:", "LogIn Blanca");
                             reiniciarValors();
                             Login(Blanca, clave);

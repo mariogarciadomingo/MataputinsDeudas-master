@@ -1387,44 +1387,6 @@ public class PrincipalActivity extends AppCompatActivity {
 
     }
 
-    /*@Override
-    protected void onPause() {
-        super.onPause();
-        myRef.removeEventListener(listener);
-
-    }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        myRef.addValueEventListener(listener);
-
-    }*/
-    private Bitmap decodeFile(File f) {
-        try {
-            // Decode image size
-
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
-
-            // The new size we want to scale to
-            final int REQUIRED_SIZE = 70;
-
-            // Find the correct scale value. It should be the power of 2.
-            int scale = 1;
-            while (o.outWidth / scale / 2 >= REQUIRED_SIZE &&
-                    o.outHeight / scale / 2 >= REQUIRED_SIZE) {
-                scale *= 2;
-            }
-
-            // Decode with inSampleSize
-
-            o2.inSampleSize = scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        } catch (FileNotFoundException e) {
-        }
-        return null;
-    }
-
 
 
 
