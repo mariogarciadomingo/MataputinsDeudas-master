@@ -55,9 +55,14 @@ public class RVAdaptadorLog extends RecyclerView.Adapter<RVAdaptadorLog.ImatgeVi
     @Override
     public void onBindViewHolder(ImatgeViewHolder holder, int position) {
         try {
-            if (deudaList.get(position).getTitol().contains("ERROR")) {
+            if (deudaList.get(position).getTitol().contains("ERROR"))
                 holder.titol.setBackgroundColor(Color.RED);
-            } else
+            else if (deudaList.get(position).getTitol().contains("Alert"))
+                holder.titol.setBackgroundColor(Color.YELLOW);
+            else
+            if (deudaList.get(position).getTitol().contains("Test"))
+                holder.titol.setBackgroundColor(Color.BLUE);
+                else
                 holder.titol.setBackgroundColor(Color.GREEN);
             holder.titol.setText(deudaList.get(position).getTitol());
             holder.missatge.setText(deudaList.get(position).getId());

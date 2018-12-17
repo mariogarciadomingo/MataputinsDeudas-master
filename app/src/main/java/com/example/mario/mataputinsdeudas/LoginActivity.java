@@ -90,7 +90,7 @@ public class LoginActivity extends AppCompatActivity {
                             reiniciarValors();
                         } else {
                             Toast.makeText(LoginActivity.this, "No se ha reconocido tu cara", Toast.LENGTH_SHORT).show();
-                            SaveLog("Log:", "LogIn Fallido Anna desde " + Build.BRAND + " " + Build.MODEL);
+                            SaveLog("Alert:", "LogIn Fallido Anna desde " + Build.BRAND + " " + Build.MODEL);
                         }
                     } catch (Exception e) {
                         SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
@@ -111,7 +111,7 @@ public class LoginActivity extends AppCompatActivity {
                             reiniciarValors();
                         } else {
                             Toast.makeText(LoginActivity.this, "No se ha reconocido tu cara", Toast.LENGTH_SHORT).show();
-                            SaveLog("Log:", "LogIn Fallido Mario desde " + Build.BRAND + " " + Build.MODEL);
+                            SaveLog("Alert:", "LogIn Fallido Mario desde " + Build.BRAND + " " + Build.MODEL);
                         }
                     } catch (Exception e) {
                         SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
@@ -131,7 +131,7 @@ public class LoginActivity extends AppCompatActivity {
                             reiniciarValors();
                         } else {
                             Toast.makeText(LoginActivity.this, "No se ha reconocido tu cara", Toast.LENGTH_SHORT).show();
-                            SaveLog("Log:", "LogIn Fallido Laurita desde " + Build.BRAND + " " + Build.MODEL);
+                            SaveLog("Alert:", "LogIn Fallido Laurita desde " + Build.BRAND + " " + Build.MODEL);
                         }
                     } catch (Exception e) {
                         SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity {
                             reiniciarValors();
                         } else {
                             Toast.makeText(LoginActivity.this, "No se ha reconocido tu cara", Toast.LENGTH_SHORT).show();
-                            SaveLog("Log:", "LogIn Fallido Lauron desde " + Build.BRAND + " " + Build.MODEL);
+                            SaveLog("Alert:", "LogIn Fallido Lauron desde " + Build.BRAND + " " + Build.MODEL);
                         }
                     } catch (Exception e) {
                         SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
@@ -167,7 +167,7 @@ public class LoginActivity extends AppCompatActivity {
                             reiniciarValors();
                         } else {
                             Toast.makeText(LoginActivity.this, "No se ha reconocido tu cara", Toast.LENGTH_SHORT).show();
-                            SaveLog("Log:", "LogIn Fallido Blanca desde " + Build.BRAND + " " + Build.MODEL);
+                            SaveLog("Alert:", "LogIn Fallido Blanca desde " + Build.BRAND + " " + Build.MODEL);
                         }
                     } catch (Exception e) {
                         SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));

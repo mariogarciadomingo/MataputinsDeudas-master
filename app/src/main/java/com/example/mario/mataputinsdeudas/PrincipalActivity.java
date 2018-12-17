@@ -166,7 +166,7 @@ public class PrincipalActivity extends AppCompatActivity {
                 String id = dh.format(fecha);
                 String forFecha = df.format(fecha);
                 SaveLog("Log:", "Deuda de " + nom + " para " + usuarios[usuario] + " de " + total + "€");
-                SaveLog("ALERT:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en Deuda");
+                SaveLog("Alert:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en Deuda");
                 //antigua
                 myRef.child(nom).child(usuarios[usuario]).setValue(total + temp);
                 myRef.child(nom).child(usuarios[usuario] + "_Anterior").setValue(temp);
@@ -1202,7 +1202,7 @@ public class PrincipalActivity extends AppCompatActivity {
                 temp = Double.parseDouble(tempDinero.toString()) / 100;
 
                 //antiguo
-                SaveLog("ALERT:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en Deuda");
+                SaveLog("Alert:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en Deuda");
                 myRef.child(nom).child(usuarios[usuario]).setValue(total - temp);
                 myRef.child(nom).child(usuarios[usuario] + "_Anterior").setValue(-temp);
                 myRef.child(usuarios[usuario]).child(nom).setValue(-(total - temp));
@@ -1340,7 +1340,7 @@ public class PrincipalActivity extends AppCompatActivity {
                     generarImatges();
                     myRef.child(nom).child("Leidos").child("foto").setValue(true);
                     //antiguo
-                    SaveLog("ALERT:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en \n myRef.child(nom).child(\"foto\").removeValue();");
+                    SaveLog("Alert:", "Hay que eliminar la version antigua cuando todos tengan la version 7 en \n myRef.child(nom).child(\"foto\").removeValue();");
                     myRef.child(nom).child("foto").removeValue();
                     swiperefresh.setRefreshing(false);}catch (Exception e)
                    {
