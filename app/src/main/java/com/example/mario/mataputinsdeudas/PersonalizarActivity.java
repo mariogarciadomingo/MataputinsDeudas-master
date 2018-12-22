@@ -25,7 +25,7 @@ public class PersonalizarActivity extends AppCompatActivity {
     TextView tuNom, Usuario, total;
 
     LinearLayout LinearUsuario;
-    Switch swFotos, swUsuario1, swUsuario2, swUsuario3, swUsuario4, swTotal, swSilencio;
+    Switch swFotos, swUsuario1, swUsuario2, swUsuario3, swUsuario4, swTotal, swSilencio,swChao;
     ConstraintLayout ColorText, ColorMateterials;
     SharedPreferences preferences;
     com.flask.colorpicker.ColorPickerView colorPickerViewText, colorPickerViewMaterials;
@@ -112,6 +112,7 @@ public class PersonalizarActivity extends AppCompatActivity {
         swUsuario2.setChecked(preferences.getBoolean("Usuario2Bool", true));
         swUsuario3.setChecked(preferences.getBoolean("Usuario3Bool", true));
         swUsuario4.setChecked(preferences.getBoolean("Usuario4Bool", true));
+        swChao.setChecked(preferences.getBoolean("Chao", false));
         swTotal.setChecked(preferences.getBoolean("TotalBool", true));
         swSilencio.setChecked(preferences.getBoolean("SilencioOA", false));
 
@@ -128,7 +129,7 @@ public class PersonalizarActivity extends AppCompatActivity {
         editor.putBoolean("Usuario4Bool", swUsuario4.isChecked());
         editor.putBoolean("TotalBool", swTotal.isChecked());
         editor.putBoolean("SilencioOA", swSilencio.isChecked());
-
+        editor.putBoolean("Chao", swChao.isChecked());
         editor.commit();
     }
 
@@ -140,7 +141,7 @@ public class PersonalizarActivity extends AppCompatActivity {
         swUsuario3 = findViewById(R.id.swUsu3);
         swUsuario4 = findViewById(R.id.swUsu4);
         swSilencio = findViewById(R.id.swSilencioOA);
-
+        swChao = findViewById(R.id.swChao);
         ColorText = findViewById(R.id.ColorTextLayout);
         ColorMateterials = findViewById(R.id.ColorMaterialLayout);
         Guardar = findViewById(R.id.PGuardar);
@@ -159,7 +160,7 @@ public class PersonalizarActivity extends AppCompatActivity {
                     LinearUsuario.setBackgroundColor(colorPickerViewMaterials.getSelectedColor());
                     ColorMateterials.setVisibility(View.GONE);
                 } else {
-                    PrincipalActivity.DesarFireDisseny(colorTexto, colorMateriales, swUsuario1.isChecked(), swUsuario2.isChecked(), swUsuario3.isChecked(), swUsuario4.isChecked(), swTotal.isChecked(), swFotos.isChecked());
+                    PrincipalActivity.DesarFireDisseny(colorTexto, colorMateriales, swUsuario1.isChecked(), swUsuario2.isChecked(), swUsuario3.isChecked(), swUsuario4.isChecked(), swTotal.isChecked(), swFotos.isChecked(),swChao.isChecked());
                     desarSharedPreferences();
                     finish();
                 }

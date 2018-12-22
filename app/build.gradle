@@ -67,7 +67,7 @@ dependencies {
     compile 'com.github.timigod:android-chat-ui:v0.1.4'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     compile 'com.amitshekhar.android:glide-bitmap-pool:0.0.1'
-
+    compile 'com.github.iammannan:EasyNotifyLibProject:1.2'
 }
 
 

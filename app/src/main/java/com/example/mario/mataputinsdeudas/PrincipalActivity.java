@@ -8,7 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -18,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.provider.SyncStateContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
@@ -53,6 +56,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.msoftworks.easynotify.EasyNotify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -71,6 +75,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static android.media.session.PlaybackState.ACTION_PLAY;
+
 
 public class PrincipalActivity extends AppCompatActivity {
     final static int PICK_IMAGE_REQUEST = 1;
@@ -85,6 +91,7 @@ public class PrincipalActivity extends AppCompatActivity {
     static DatabaseReference myRef, ref, versionref, dblog;
     static String nom;
     static Context context;
+    static EasyNotify easyNotify;
     static Double temp = 0.0;
     static String tempString = "";
     final int PICK_IMAGE_REQUEST_PORFILE = 2;
@@ -101,7 +108,7 @@ public class PrincipalActivity extends AppCompatActivity {
     LinearLayout LinearUsuario1, LinearUsuario2, LinearUsuario3, LinearUsuario4, LinearUsurios;
     ConstraintLayout ConstrainUsuario, Fondo;
     SwipeRefreshLayout swiperefresh;
-    String token = "";
+    static String token = "";
     boolean versionAntigua = false;
     String url = "";
     @Nullable
@@ -120,7 +127,7 @@ public class PrincipalActivity extends AppCompatActivity {
     static MediaPlayer mediaPlayer;
     static BitmapFactory.Options o = new BitmapFactory.Options();
     static BitmapFactory.Options o2 = new BitmapFactory.Options();
-    public static void DesarFireDisseny(int colorText, int colorMaterials, boolean usu1, boolean usu2, boolean usu3, boolean usu4, boolean total, boolean imatges) {
+    public static void DesarFireDisseny(int colorText, int colorMaterials, boolean usu1, boolean usu2, boolean usu3, boolean usu4, boolean total, boolean imatges, boolean chao) {
         SaveLog("Log:", "Cambio Diseño(" + nom + ")");
         myRef.child(nom).child("Disseny").child("TextColor").setValue(colorText);
         myRef.child(nom).child("Disseny").child("TextMaterials").setValue(colorMaterials);
@@ -130,6 +137,11 @@ public class PrincipalActivity extends AppCompatActivity {
         myRef.child(nom).child("Disseny").child("Usuario4").setValue(usu4);
         myRef.child(nom).child("Disseny").child("Total").setValue(total);
         myRef.child(nom).child("Disseny").child("Imatges").setValue(imatges);
+        myRef.child(nom).child("Disseny").child("Chao").setValue(chao);
+        if(chao){
+       // myRef.child(nom).child("Disseny").child("TextColor").setValue(Color.RGBToHSV(9,9,9,100));
+       // myRef.child(nom).child("Disseny").child("TextMaterials").setValue(Color.RED);
+        }
     }
 
     public static void firmar(ArrayList<Integer> usuarios, EditText descripcion, EditText dinero) {
@@ -261,7 +273,7 @@ public class PrincipalActivity extends AppCompatActivity {
             GlideBitmapPool.initialize(10 * 1024 * 1024);
             setContentView(R.layout.activity_principal);
 
-            token = FirebaseInstanceId.getInstance().getToken();
+
             mAuth = FirebaseAuth.getInstance();
             user = mAuth.getCurrentUser();
             if (user == null) {
@@ -288,9 +300,39 @@ public class PrincipalActivity extends AppCompatActivity {
             gestorDatos();
             CambiarColor();
             CargarConfiguracion();
+            token = "Mario";
+            easyNotify = new EasyNotify("AAAAbhbdXg8:APA91bFkAzHEpGtqQ5VqFtIJ9OlX0UeIHeg9HdCkQr4-5OF_4YRqb3w4rD8lSkHeY16WawXhSjRTsbNvFVTh6rUOc7GnrxhgVexHbH3XAL7Pg5vzMz_myqL_AYlW0ATH11f9zoF2Spj3");
+            easyNotify.setSendBy(EasyNotify.TOPIC);
         } catch (Exception e) {
             SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
         }
+    }
+    public static void EnviarNotificacion(String titulo,String Mensaje,String el)
+    {
+        try {
+
+
+        easyNotify.setTitle("YOUR_TITLE_STRING");
+        easyNotify.setBody(Mensaje);
+        easyNotify.setClickAction("PrincipalActivity");
+        easyNotify.setSound("default");
+        easyNotify.setTopic(token);
+        easyNotify.nPush();
+            easyNotify.setEasyNotifyListener(new EasyNotify.EasyNotifyListener() {
+                @Override
+                public void onNotifySuccess(String s) {
+                   // Toast.makeText(PrincipalActivity.this, s, Toast.LENGTH_SHORT).show();
+                    SaveLog("Alert: ", s + token);
+                }
+
+                @Override
+                public void onNotifyError(String s) {
+                    SaveLog("ERROR: ", s + token);
+            }
+
+            });
+        }
+        catch (Exception e){SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));}
     }
 
     private void CargarConfiguracion() {
@@ -310,6 +352,7 @@ public class PrincipalActivity extends AppCompatActivity {
         LinearUsuario4.setVisibility(Visibilidad(usu4));
         titolTotal.setVisibility(Visibilidad(totalBool));
         total.setVisibility(Visibilidad(totalBool));
+
 
     }
 
@@ -906,6 +949,7 @@ public class PrincipalActivity extends AppCompatActivity {
         LinearUsuario4.setBackgroundColor(col);
         total.setBackgroundColor(col);
         titolTotal.setBackgroundColor(col);
+
     }
 
     private void gestorDatos() {
@@ -933,6 +977,7 @@ public class PrincipalActivity extends AppCompatActivity {
                         editor.putBoolean("Usuario4Bool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Usuario4").getValue() + ""));
                         editor.putBoolean("TotalBool", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Total").getValue() + ""));
                         editor.putBoolean("Imagenes", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Imatges").getValue() + ""));
+                        editor.putBoolean("Chao", Boolean.parseBoolean(dataSnapshot.child("Disseny").child("Chao").getValue() + ""));
                         editor.putBoolean("Contraseña", Boolean.parseBoolean(dataSnapshot.child("Contraseña").child("Activada").getValue() + ""));
                         editor.commit();
                         CambiarColor();
@@ -1009,10 +1054,7 @@ public class PrincipalActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
                     }
-                    if (total1 + total2 + total3 + total4 < -10) {
-                        moroso.setText("Empiezas a ser una persona morosa");
-                    } else
-                        moroso.setText("");
+
                     if (versionAntigua) {
 
                         Btupdate.setVisibility(View.VISIBLE);
@@ -1096,7 +1138,7 @@ public class PrincipalActivity extends AppCompatActivity {
                     }
 
                 } else {
-
+                    moroso.setVisibility(View.GONE);
                     Btupdate.setVisibility(View.GONE);
                     Btupdate.setVisibility(View.GONE);
                 }

@@ -188,7 +188,7 @@ public class ChatActivity extends AppCompatActivity {
                         cont++;
                       //  }
                         PrincipalActivity.SaveLog("Log: ", "Mensaje enviado " + tu + " a " + el);
-
+                        PrincipalActivity.EnviarNotificacion("",chatMessage.getMessage(),el);
                         return true;
                     } catch (Exception e) {
                         PrincipalActivity.SaveLog("ERROR: ", e.getMessage() + " " + Log.getStackTraceString(e));
